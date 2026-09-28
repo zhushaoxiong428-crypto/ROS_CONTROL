@@ -1,55 +1,68 @@
 # leap_ros_mcu_driver
 
-软件版本：`v1.5`
+[![CI](https://github.com/zhushaoxiong428-crypto/ROS_CONTROL/actions/workflows/ci.yml/badge.svg)](https://github.com/zhushaoxiong428-crypto/ROS_CONTROL/actions/workflows/ci.yml)
 
-`leap_ros_mcu_driver` 是 Leap_ROS 底盘的 ESP32-S3 下位机驱动固件，用于电机控制、里程计、IMU、雷达、超声波、电池状态、状态灯和外设数据采集。固件支持 micro-ROS 与 MAVLink 通信模式，并提供 Wi-Fi 配网页用于运行参数配置。
+ESP32-S3 差速底盘下位机固件（FreeRTOS + micro-ROS / MAVLink）：电机闭环、里程计、IMU、激光雷达、超声波、电池监测，经 Wi-Fi 与 ROS 2 通信。
 
-> 本仓库基于开源项目 [LEAP ROS2](https://github.com/czu963889306-dev/leap_ros2) 的下位机固件
-> [leap_ros_mcu_driver](https://github.com/czu963889306-dev/leap_ros_mcu_driver)（v1.5）进行二次开发，
-> 保留了上游提交历史。上游之后的改动见下方各节与提交记录。
+> 基于开源项目 [LEAP ROS2](https://github.com/czu963889306-dev/leap_ros2) 的下位机固件
+> [leap_ros_mcu_driver](https://github.com/czu963889306-dev/leap_ros_mcu_driver)（v1.5）二次开发，保留上游提交历史。
+> 以下是在上游基础上完成的工作。
 
-## v1.5 更新内容
+## 主要工作
 
-- 支持通过服务通讯修改速度 PID 参数，并提供获取 PID 参数服务。
-- 超声波改为独立 HC-SR04，TRIG 使用 `GPIO21`，ECHO 使用 `GPIO47`。
-- micro-ROS 新增 `/ultrasonic` 话题，发布超声波距离数据。
-- 支持 MAVLink UDP、MAVLink UART 与 micro-ROS 通信模式切换。
-- 支持长按 BOOT 键清除 Wi-Fi 配置，并重启回到配网模式。
+| 方向 | 内容 | 文档 |
+| --- | --- | --- |
+| 直行偏航 | 定位出左右轮 5.4% 的行程比例差并标定；加入 IMU 航向保持。1 m 直行航向误差从 14° 降到约 1–2° | [直行航向保持](doc/heading_hold.md) |
+| 起步控制 | 分轮前馈（悬空实验拟合）、起步托底与 300 ms 线性释放、直行交叉耦合 PI、起步故障锁存 | [起步标定与验证](doc/motor_startup_tuning.md) |
+| 安全 | 电池运动互锁（欠压/过压/采样失效即制动，恢复需零速重新武装）；锁存式急停（ROS 话题 / MAVLink / BOOT 键） | [电池运动互锁](doc/power_motion_interlock.md)、[协议](doc/protocols.md) |
+| 并发正确性 | 消除通信任务与控制任务跨核竞争；命令队列改为有序 FIFO，避免零速武装命令被覆盖 | 提交记录 |
+| 通信链路 | 遥测 QoS A/B 实验与发布耗时探针；LaserScan 下采样到 320 点避免 IP 分片，`/motor_debug` 主机接收率 52% → 94% | [起步标定与验证](doc/motor_startup_tuning.md#遥测发布-qos-ab-实验) |
+| 工程化 | 11 个主机单元测试（控制器、状态机、日志分析）；GitHub Actions 编译固件并跑测试；修复上游仓库在作者机器以外无法编译的问题 | [CI](.github/workflows/ci.yml) |
 
-## 底盘参数
+## 实测：直行偏航
 
-- `kTrackWidth` 已修改为 `131.7 mm`，源码位置：`main/control/motion_controller.cpp`。
+落地直行 1 m（`tools/straight_drive_test.py`），IMU 航向为车头实际转角，侧向偏移取自里程计（比例标定后里程计与 IMU 一致）：
 
-## 直线起步同步控制
+| 配置 | 速度 | IMU 航向变化 | 侧向偏移 |
+| --- | --- | ---: | ---: |
+| 上游控制（仅编码器同步） | 0.05–0.2 m/s | 各速度均明显左偏；由比例差推算约 20° / 0.9 m | — |
+| + 左右轮比例标定 | 0.1 m/s | +14.2° | +18.4 cm |
+| | 0.2 m/s | +2.8°（峰值 +6.0°） | +11.3 cm |
+| + 比例标定 + IMU 航向保持 | 0.1 m/s | +1.2° | −3.3 cm |
+| | 0.2 m/s | −2.0° | −1.1 cm |
 
-当前开发分支针对左右轮起步响应不一致增加了两层控制：
+（+ 为向左；每个配置各 1 次试验。）
 
-- 编码器反馈的起步协调：未克服静摩擦的车轮获得有限 PWM 托底；若另一轮已经起转，会限制快轮继续加速，直到两轮均沿指令方向达到起转阈值。
-- 仅直行速度模式启用的交叉耦合 PI：根据左右轮跟踪误差之差，对两轮施加等大反向的 PWM 微调；转弯、单轮控制、停车和换向过程不启用。
+定位过程：开启航向保持后车头走直了，里程计却推算出约 20° 的右转，说明右轮每个编码器脉冲实际走得比左轮远约 5.4%；
+0.1 与 0.2 m/s 下比值为 1.0531 / 1.0553，与速度无关，属于减速比或轮径差而非打滑。标定后比值为 1.0005。
+只做标定时，匀速段航向已经不再变化，但起步约 4 s 内仍累积约 14° 左偏且无法回补，因此需要航向闭环兜底。
 
-启动超过 `300 ms` 仍未检测到两轮正常起转时，控制器会锁存启动故障并制动。发送零速度指令后才允许重新启动。设计、基线数据、参数和实车验收流程见 [直线起步标定与验证](doc/motor_startup_tuning.md)。
+## 系统结构
 
-## 直行航向保持
+```text
+imu_task ──────┐                              ┌── micro-ROS / MAVLink 通信任务
+battery_task ──┼─> 单槽状态队列 ──> motion_task (20 ms, vTaskDelayUntil) <── 运动命令 FIFO
+lidar_task ────┘                     │  电池互锁 → 急停门控 → 模式分发
+                                     │  MotionController：速度环 PI + 前馈
+                                     │   ├─ WheelPairController（起步协调 / 同步 PI）
+                                     │   └─ HeadingHold（IMU 航向保持）
+                                     └─> 电机 PWM、里程计、/motor_debug 遥测
+```
 
-编码器同步只能保证两轮转速一致，看不到轮径差、打滑和同步死区内的残留速度差，落地直行仍会持续偏航。直行命令开始时固件锁存 IMU 航向，用 PI 把航向误差换算成左右轮等大反向的目标转速修正。设计、参数和落地验证脚本见 [直行航向保持](doc/heading_hold.md)。
-
-## 电池运动互锁
-
-运动输出默认闭锁。固件必须先看到连续 3 个独立、位于 `6.4–8.5 V` 的 2S 电池样本，再收到一条新的全车零速命令，才允许后续运动。`<=6.0 V`、`>8.6 V`、ADC 无效或样本超过 `1200 ms` 未更新都会立即清空目标并制动；电压恢复不会自动继续旧命令。状态机、诊断字段和架空验收步骤见 [电池运动互锁](doc/power_motion_interlock.md)。
+控制相关的纯逻辑（`WheelPairController`、`BatteryMotionInterlock`、`HeadingHold`、`EmergencyStopGate`）不依赖 ESP-IDF，可在主机上单元测试。
 
 ## 构建与测试
 
-先加载 ESP-IDF 5.5 环境，再构建固件。克隆后第一次构建前先运行一次
-`tools/prepare_build.sh`：它把 `dependencies.lock` 中 micro-ROS 组件的绝对路径改为本机路径，
-并修正预编译库的时间戳，避免触发需要 colcon 和联网的 micro-ROS 完整重编：
+需要 ESP-IDF 5.5。克隆后首次构建前运行一次 `tools/prepare_build.sh`：它把 `dependencies.lock` 中 micro-ROS 组件的绝对路径改为本机路径，并修正预编译库的时间戳，避免触发需要 colcon 和联网的 micro-ROS 完整重编。
 
 ```bash
 tools/prepare_build.sh
 . ~/esp/esp-idf/export.sh
 idf.py build
+idf.py -p /dev/ttyUSB0 flash monitor
 ```
 
-不连接硬件也可以运行轮对控制、电池互锁状态机和日志分析器测试：
+不接硬件运行主机测试：
 
 ```bash
 cmake -S tests -B /tmp/leap-host-tests
@@ -57,8 +70,41 @@ cmake --build /tmp/leap-host-tests
 ctest --test-dir /tmp/leap-host-tests --output-on-failure
 ```
 
-生成物为 `build/leap_low_v1.bin` 和 `build/merged-binary.bin`。
+落地直行测试（车放地上，前方留足空间）：
 
-## 协议说明
+```bash
+source /opt/ros/humble/setup.bash
+python3 tools/straight_drive_test.py --speed 0.1 --distance 1.0 --confirm-ground
+```
 
-MAVLink 与 micro-ROS 的消息、话题和参数说明见 [doc/protocols.md](doc/protocols.md)。
+## 可配置项
+
+`idf.py menuconfig → Leap low settings`：
+
+| 选项 | 默认 | 说明 |
+| --- | --- | --- |
+| Hold IMU heading while driving straight | 开 | IMU 航向保持，关闭仅用于 A/B 对比 |
+| Right/left wheel travel ratio (×10000) | 10000 | 左右轮行程比标定，本车为 10542 |
+| Published LaserScan point count | 320 | `/scan` 点数 |
+| Fallback Wi-Fi SSID / password | Maturo / maturo2026 | 未配网时尝试连接的热点 |
+
+## 目录
+
+```text
+main/control/        运动控制、轮对控制、航向保持、电池互锁、急停门控
+main/tasks/          FreeRTOS 任务（控制、传感器、通信）
+components/          电机、编码器（PCNT）、IMU、雷达等驱动
+tests/               主机单元测试
+tools/               实车试验与日志分析脚本
+data/                实车试验数据
+doc/                 设计与验证文档、通信协议
+```
+
+## 已知问题
+
+- 起步约 2 s 内车头仍会先左偏 3–4° 再被拉回，略有过冲（起步打滑/万向轮转向，编码器不可见）。可为航向保持加入陀螺角速度阻尼。
+- 实测每个配置仅 1 次试验；比例标定基于当前轮胎与载荷，更换轮子或负载后需要重新标定。
+
+## 上游 v1.5 功能
+
+速度 PID 参数读写服务、HC-SR04 超声波（TRIG `GPIO21` / ECHO `GPIO47`）与 `/ultrasonic` 话题、MAVLink UDP / UART 与 micro-ROS 模式切换、长按 BOOT 清除 Wi-Fi 配置。轮距 `kTrackWidth = 131.7 mm`。
