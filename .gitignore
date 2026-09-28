@@ -11,3 +11,11 @@ sdkconfig.old
 *.swo
 .DS_Store
 Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+
+# Local tooling that is not part of this project
+.codex-clash-repair/
+
