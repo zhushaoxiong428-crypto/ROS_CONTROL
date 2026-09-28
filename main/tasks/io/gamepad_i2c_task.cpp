@@ -175,11 +175,11 @@ void gamepad_i2c_task(void* p) {
                     frame.header1,
                     frame.header2,
                     frame.tail);
-                esp_log_buffer_hex(kTag, &frame, sizeof(frame));
+                ESP_LOG_BUFFER_HEX(kTag, &frame, sizeof(frame));
                 PublishDisconnected();
             } else if (!HasValidChecksum(frame)) {
                 ESP_LOGW(kTag, "Invalid checksum: got=0x%02X expected=0x%02X", frame.checksum, CalculateChecksum(frame));
-                esp_log_buffer_hex(kTag, &frame, sizeof(frame));
+                ESP_LOG_BUFFER_HEX(kTag, &frame, sizeof(frame));
                 PublishDisconnected();
             } else {
                 LogFrame(frame);

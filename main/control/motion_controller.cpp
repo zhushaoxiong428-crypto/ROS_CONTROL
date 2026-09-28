@@ -249,32 +249,6 @@ void MotionController::SetBatteryVoltage(float voltage_v)
   }
 }
 
-// int16_t MotionController::ApplyDeadband(float target_vel, float pid_output)
-// {
-//   const float kDeadband = 150.0f;
-//   if (std::abs(target_vel) > 0.1f && std::abs(pid_output) > 0.1f)
-//   {
-//     float out = pid_output + (pid_output > 0 ? kDeadband : -kDeadband);
-//     return static_cast<int16_t>(std::clamp(out, -kMaxPwm, kMaxPwm));
-//   }
-//   return 0;
-// }
-// 修改基础pwm=140；
-// int16_t MotionController::ApplyDeadband(float target_vel, float pid_output)
-// {
-//   const float kDeadband = 140.0f;
-//   // 没有速度目标时，不输出PWM
-//   if (std::abs(target_vel) <= 0.1f)
-//   {
-//     return 0;
-//   }
-//   // 基础驱动力方向由“目标转速方向”决定
-//   // PID输出只负责在基础驱动力附近作增减修正
-//   float base_pwm = (target_vel > 0.0f) ? kDeadband : -kDeadband;
-//   float out=base_pwm+pid_output;
-//   return static_cast<int16_t>(std::clamp(out,-kMaxPwm,kMaxPwm));
-// }
-// pwm固定=140/150并不适配所有的目标速度，在此基础上增加前馈
 float MotionController::CalculateBasePwm(
     int wheel_index, float target_vel, float pid_output) const
 {
@@ -361,9 +335,6 @@ void MotionController::Update(float dt, float current_imu_yaw_rad)
     Stop();
     return;
   }
-  // ESP_LOGI(TAG,
-  //          "local_vx=%.6f, local_vy=%.6f, local_vw=%.6f, yaw=%.6f, pos_y=%.6f",
-  //          local_vx, local_vy, local_vw, odom_yaw_, pos_y_);
   // 3. 执行外环控制逻辑
   if (control_mode_ == ControlMode::kPosition)
   {
@@ -462,17 +433,6 @@ void MotionController::Update(float dt, float current_imu_yaw_rad)
     velocity_stop_command = IsNearZero(final_target_vel_[i]);
   }
 
-  // if (velocity_stop_command)
-  // {
-  //   for (int i = 0; i < kNumWheels; ++i)
-  //   {
-  //     target_vel_[i] = 0.0f;
-  //     final_target_vel_[i] = 0.0f;
-  //     pid_vel_[i].Reset();
-  //     motors_[i]->Brake();
-  //   }
-  //   return;
-  // }
   if (velocity_stop_command)
   {
     for (int i = 0; i < kNumWheels; ++i)
@@ -494,24 +454,7 @@ void MotionController::Update(float dt, float current_imu_yaw_rad)
     return;
   }
 
-  // for (int i = 0; i < kNumWheels; ++i)
-  // {
-  //   if (control_mode_ == ControlMode::kRelativeSeq)
-  //   {
-  //     if (std::abs(final_target_vel_[i]) > std::abs(target_vel_[i]))
-  //     {
-  //       target_vel_[i] = MoveTowards(target_vel_[i], final_target_vel_[i], max_rpm_step);
-  //     }
-  //     else
-  //     {
-  //       target_vel_[i] = final_target_vel_[i];
-  //     }
-  //   }
-  //   else
-  //   {
-  //     target_vel_[i] = final_target_vel_[i];
-  //   }
-  // 对/cmd_vel目标轮速进行加速度限制
+  // 对目标轮速进行加速度限制
   for (int i = 0; i < kNumWheels; ++i)
   {
     // 普通速度控制模式：
@@ -543,7 +486,6 @@ void MotionController::Update(float dt, float current_imu_yaw_rad)
     {
       target_vel_[i] = final_target_vel_[i];
     }
-
   }
 
   // Compute both independent wheel-loop outputs before applying the paired
@@ -624,21 +566,6 @@ void MotionController::GetVelocity(float *linear_x, float *linear_y, float *angu
   *angular_z = (-v[0] + v[1]) / (2.0f * kLy);
 }
 
-// void MotionController::Stop()
-// {
-//   control_mode_ = ControlMode::kVelocity;
-//   for (int i = 0; i < kNumWheels; ++i)
-//   {
-//     target_vel_[i] = 0.0f;
-//     final_target_vel_[i] = 0.0f;
-//     pid_vel_[i].Reset();
-//     motors_[i]->Brake();
-//   }
-//   pid_pos_x_.Reset();
-//   pid_pos_y_.Reset();
-//   pid_pos_yaw_.Reset();
-//   seq_state_ = SeqState::kIdle;
-// }
 void MotionController::Stop()
 {
   control_mode_ = ControlMode::kVelocity;
