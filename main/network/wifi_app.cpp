@@ -21,11 +21,11 @@ static const char *kWifiCfgPasswordKey = "sta_pass";
 static const char *kWifiCfgProvisionOnlyKey = "provision_only";
 static const char *kRuntimeCfgNamespace = "runtime_cfg";
 static const char *kRuntimeCfgCommModeKey = "comm_mode";
+static const char *kRuntimeCfgMicroRosAgentAutoKey = "uros_auto";
 static const char *kRuntimeCfgMicroRosAgentIpKey = "uros_ip";
 static const char *kRuntimeCfgMicroRosAgentPortKey = "uros_port";
 static const char *kDefaultStaSsid = "Maturo";
 static const char *kDefaultStaPassword = "maturo2026";
-static const char *kDefaultMicroRosAgentIp = "192.168.31.214";
 static constexpr uint16_t kDefaultMicroRosAgentPort = 8888;
 static constexpr esp_err_t kProvisionOnlyCredentials = ESP_ERR_INVALID_STATE;
 
@@ -113,19 +113,19 @@ void wifi_get_default_runtime_config(WifiRuntimeConfig *config) {
     }
 
     config->comm_mode = WifiCommMode::kMicroRos;
-    strncpy(config->microros_agent_ip, kDefaultMicroRosAgentIp,
-            sizeof(config->microros_agent_ip) - 1);
-    config->microros_agent_ip[sizeof(config->microros_agent_ip) - 1] = '\0';
+    config->microros_agent_auto_discovery = true;
+    config->microros_agent_ip[0] = '\0';
     config->microros_agent_port = kDefaultMicroRosAgentPort;
 }
 
 static bool is_valid_runtime_config(const WifiRuntimeConfig *config) {
-    if (config == NULL || config->microros_agent_ip[0] == '\0' ||
-        config->microros_agent_port == 0) {
+    if (config == NULL || config->microros_agent_port == 0 ||
+        !wifi_comm_mode_is_valid(config->comm_mode)) {
         return false;
     }
 
-    return wifi_comm_mode_is_valid(config->comm_mode);
+    return config->microros_agent_auto_discovery ||
+           config->microros_agent_ip[0] != '\0';
 }
 
 static void ensure_wifi_stack_ready() {
@@ -375,10 +375,12 @@ esp_err_t wifi_load_runtime_config(WifiRuntimeConfig *config) {
     wifi_get_default_runtime_config(config);
 
     nvs_handle_t handle;
-    esp_err_t err = nvs_open(kRuntimeCfgNamespace, NVS_READONLY, &handle);
+    esp_err_t err = nvs_open(kRuntimeCfgNamespace, NVS_READWRITE, &handle);
     if (err != ESP_OK) {
         return err;
     }
+
+    bool needs_commit = false;
 
     uint8_t comm_mode = static_cast<uint8_t>(config->comm_mode);
     esp_err_t read_err = nvs_get_u8(handle, kRuntimeCfgCommModeKey, &comm_mode);
@@ -391,11 +393,39 @@ esp_err_t wifi_load_runtime_config(WifiRuntimeConfig *config) {
         err = read_err;
     }
 
-    size_t ip_len = sizeof(config->microros_agent_ip);
-    read_err = nvs_get_str(handle, kRuntimeCfgMicroRosAgentIpKey,
-                           config->microros_agent_ip, &ip_len);
-    if (read_err != ESP_OK && read_err != ESP_ERR_NVS_NOT_FOUND) {
-        err = read_err;
+    uint8_t auto_discovery = 1;
+    read_err = nvs_get_u8(handle, kRuntimeCfgMicroRosAgentAutoKey, &auto_discovery);
+    if (read_err == ESP_OK && auto_discovery <= 1) {
+        config->microros_agent_auto_discovery = auto_discovery != 0;
+    } else if (read_err == ESP_ERR_NVS_NOT_FOUND) {
+        // Migration from the old fixed-IP format: automatic discovery becomes
+        // the default and the stale endpoint is removed from NVS.
+        config->microros_agent_auto_discovery = true;
+        esp_err_t write_err = nvs_set_u8(handle, kRuntimeCfgMicroRosAgentAutoKey, 1);
+        if (write_err == ESP_OK) {
+            needs_commit = true;
+        } else {
+            err = write_err;
+        }
+    } else {
+        err = (read_err == ESP_OK) ? ESP_ERR_INVALID_ARG : read_err;
+    }
+
+    if (config->microros_agent_auto_discovery) {
+        config->microros_agent_ip[0] = '\0';
+        const esp_err_t erase_err = nvs_erase_key(handle, kRuntimeCfgMicroRosAgentIpKey);
+        if (erase_err == ESP_OK) {
+            needs_commit = true;
+        } else if (erase_err != ESP_ERR_NVS_NOT_FOUND && err == ESP_OK) {
+            err = erase_err;
+        }
+    } else {
+        size_t ip_len = sizeof(config->microros_agent_ip);
+        read_err = nvs_get_str(handle, kRuntimeCfgMicroRosAgentIpKey,
+                               config->microros_agent_ip, &ip_len);
+        if (read_err != ESP_OK && read_err != ESP_ERR_NVS_NOT_FOUND) {
+            err = read_err;
+        }
     }
 
     uint16_t port = config->microros_agent_port;
@@ -404,6 +434,15 @@ esp_err_t wifi_load_runtime_config(WifiRuntimeConfig *config) {
         config->microros_agent_port = port;
     } else if (read_err != ESP_ERR_NVS_NOT_FOUND) {
         err = read_err;
+    }
+
+    if (needs_commit) {
+        const esp_err_t commit_err = nvs_commit(handle);
+        if (commit_err != ESP_OK && err == ESP_OK) {
+            err = commit_err;
+        } else if (commit_err == ESP_OK) {
+            ESP_LOGI(TAG, "Migrated micro-ROS Agent config to automatic discovery");
+        }
     }
 
     nvs_close(handle);
@@ -429,8 +468,19 @@ esp_err_t wifi_save_runtime_config(const WifiRuntimeConfig *config) {
     err = nvs_set_u8(handle, kRuntimeCfgCommModeKey,
                      static_cast<uint8_t>(config->comm_mode));
     if (err == ESP_OK) {
-        err = nvs_set_str(handle, kRuntimeCfgMicroRosAgentIpKey,
-                          config->microros_agent_ip);
+        err = nvs_set_u8(handle, kRuntimeCfgMicroRosAgentAutoKey,
+                         config->microros_agent_auto_discovery ? 1 : 0);
+    }
+    if (err == ESP_OK) {
+        if (config->microros_agent_auto_discovery) {
+            err = nvs_erase_key(handle, kRuntimeCfgMicroRosAgentIpKey);
+            if (err == ESP_ERR_NVS_NOT_FOUND) {
+                err = ESP_OK;
+            }
+        } else {
+            err = nvs_set_str(handle, kRuntimeCfgMicroRosAgentIpKey,
+                              config->microros_agent_ip);
+        }
     }
     if (err == ESP_OK) {
         err = nvs_set_u16(handle, kRuntimeCfgMicroRosAgentPortKey,
@@ -449,6 +499,13 @@ esp_err_t wifi_save_comm_mode(WifiCommMode mode) {
     (void)wifi_load_runtime_config(&config);
     config.comm_mode = mode;
     return wifi_save_runtime_config(&config);
+}
+
+esp_err_t wifi_get_sta_ip_info(esp_netif_ip_info_t *ip_info) {
+    if (ip_info == NULL || s_sta_netif == nullptr) {
+        return ESP_ERR_INVALID_STATE;
+    }
+    return esp_netif_get_ip_info(s_sta_netif, ip_info);
 }
 
 esp_err_t wifi_get_softap_ip_info(esp_netif_ip_info_t *ip_info) {

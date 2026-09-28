@@ -4,4 +4,35 @@ menu "Leap low settings"
         string "micro-ROS local UDP port"
         default "8888"
 
+    config MICROROS_TELEMETRY_BEST_EFFORT
+        bool "Use best-effort reliability for odom, motor debug and scan (A/B test)"
+        default n
+        help
+            Diagnostic A/B switch. Only changes the reliability policy of
+            /odom, /motor_debug and /scan publishers; all other QoS settings,
+            subscriptions and services remain unchanged. Best-effort publishers
+            cannot deliver to reliable-only subscriptions.
+
+    config MICROROS_DISABLE_SCAN_AB_TEST
+        bool "Disable LaserScan publication (network A/B test only)"
+        default n
+        help
+            Keep the /scan publisher entity but skip its periodic rcl_publish
+            call. This isolates the bandwidth and IP-fragmentation effect of
+            LaserScan without changing motor control, /cmd_vel, other topic
+            rates, or their QoS. Do not use this diagnostic build for normal
+            navigation because /scan will have no samples.
+
+    config MICROROS_SCAN_POINT_COUNT
+        int "Published LaserScan point count"
+        range 90 360
+        default 320
+        help
+            Downsample the lidar's 360 one-degree bins to this many published
+            bins, retaining the closest valid return in each angular bin. 320
+            points serialize to about 1344 bytes, keeping the resulting XRCE
+            UDP datagram below a 1500-byte WLAN IP MTU. Using 360 points
+            serializes to about 1504 bytes before XRCE/UDP/IP overhead and can
+            trigger IP fragmentation on phone hotspots.
+
 endmenu

@@ -6,8 +6,10 @@
 #include "msg/imu_msg.h"
 #include "msg/lidar_msg.h"
 #include "msg/motion_msg.h"
+#include "msg/power_safety_msg.h"
 #include "msg/temperature_msg.h"
 #include "msg/ultrasonic_msg.h"
+#include "control/battery_motion_interlock.h"
 
 #include <ctype.h>
 #include <limits.h>
@@ -449,8 +451,15 @@ static const char kProvisionHtmlTemplate[] = R"HTML(
           </select>
         </div>
         <div>
+          <label id="agent-mode-label" for="agent-mode">micro-ROS Agent 查找方式</label>
+          <select id="agent-mode" name="microros_agent_mode">
+            <option id="agent-mode-auto" value="auto">自动发现（推荐）</option>
+            <option id="agent-mode-manual" value="manual">手动地址</option>
+          </select>
+        </div>
+        <div>
           <label id="agent-ip-label" for="agent-ip">micro-ROS Agent IP</label>
-          <input id="agent-ip" name="microros_agent_ip" maxlength="15" inputmode="decimal" required>
+          <input id="agent-ip" name="microros_agent_ip" maxlength="15" inputmode="decimal">
         </div>
         <div>
           <label id="agent-port-label" for="agent-port">micro-ROS Agent Port</label>
@@ -560,6 +569,7 @@ static const char kProvisionHtmlTemplate[] = R"HTML(
     const passwordInput = document.getElementById('password');
     const runtimeForm = document.getElementById('runtime-form');
     const commModeInput = document.getElementById('comm-mode');
+    const agentModeInput = document.getElementById('agent-mode');
     const agentIpInput = document.getElementById('agent-ip');
     const agentPortInput = document.getElementById('agent-port');
     const cameraForm = document.getElementById('camera-form');
@@ -608,6 +618,9 @@ static const char kProvisionHtmlTemplate[] = R"HTML(
         runtimeSaved: '已保存，设备正在重启...',
         runtimeSaveFailed: (message) => `保存失败：${message}`,
         commModeLabel: '默认通信协议',
+        agentModeLabel: 'micro-ROS Agent 查找方式',
+        agentModeAuto: '自动发现（推荐）',
+        agentModeManual: '手动地址',
         agentIpLabel: 'micro-ROS Agent IP',
         agentPortLabel: 'micro-ROS Agent Port',
         runtimeSubmit: '保存通信设置并重启',
@@ -672,6 +685,9 @@ static const char kProvisionHtmlTemplate[] = R"HTML(
         runtimeSaved: 'Saved. Device is restarting...',
         runtimeSaveFailed: (message) => `Save failed: ${message}`,
         commModeLabel: 'Default Protocol',
+        agentModeLabel: 'micro-ROS Agent Lookup',
+        agentModeAuto: 'Automatic Discovery (Recommended)',
+        agentModeManual: 'Manual Address',
         agentIpLabel: 'micro-ROS Agent IP',
         agentPortLabel: 'micro-ROS Agent Port',
         runtimeSubmit: 'Save Settings and Restart',
@@ -728,6 +744,9 @@ static const char kProvisionHtmlTemplate[] = R"HTML(
       document.getElementById('status-title').textContent = i18n.statusTitle;
       document.getElementById('runtime-title').textContent = i18n.runtimeTitle;
       document.getElementById('comm-mode-label').textContent = i18n.commModeLabel;
+      document.getElementById('agent-mode-label').textContent = i18n.agentModeLabel;
+      document.getElementById('agent-mode-auto').textContent = i18n.agentModeAuto;
+      document.getElementById('agent-mode-manual').textContent = i18n.agentModeManual;
       document.getElementById('agent-ip-label').textContent = i18n.agentIpLabel;
       document.getElementById('agent-port-label').textContent = i18n.agentPortLabel;
       document.getElementById('runtime-submit-btn').textContent = i18n.runtimeSubmit;
@@ -874,6 +893,14 @@ static const char kProvisionHtmlTemplate[] = R"HTML(
       return `${fixed(pid.kp, 2)} / ${fixed(pid.ki, 2)} / ${fixed(pid.kd, 2)}`;
     }
 
+    function updateAgentEndpointFields() {
+      const manual = agentModeInput.value === 'manual';
+      agentIpInput.disabled = !manual;
+      agentIpInput.required = manual;
+      agentPortInput.disabled = !manual;
+      agentPortInput.required = manual;
+    }
+
     function renderStatus(data) {
       const i18n = getI18n();
       const wifi = data.wifi || {};
@@ -942,10 +969,16 @@ static const char kProvisionHtmlTemplate[] = R"HTML(
 
       if (!runtimeFormDirty) {
         if (runtime.comm_mode) commModeInput.value = runtime.comm_mode;
-        if (runtime.microros_agent_ip) agentIpInput.value = runtime.microros_agent_ip;
+        agentModeInput.value = runtime.microros_agent_mode || 'auto';
+        agentIpInput.value = runtime.microros_agent_ip || '';
         if (runtime.microros_agent_port) agentPortInput.value = runtime.microros_agent_port;
+        updateAgentEndpointFields();
       }
-      text('runtime-status', `${runtime.comm_mode || '--'} | ${runtime.microros_agent_ip || '--'}:${runtime.microros_agent_port || '--'}`);
+      const agentMode = runtime.microros_agent_mode || 'auto';
+      const endpoint = runtime.microros_agent_ip
+        ? `${runtime.microros_agent_ip}:${runtime.microros_agent_port || '--'}`
+        : 'discovering';
+      text('runtime-status', `${runtime.comm_mode || '--'} | ${agentMode} | ${endpoint}`);
     }
 
     async function refreshStatus() {
@@ -967,11 +1000,13 @@ static const char kProvisionHtmlTemplate[] = R"HTML(
     runtimeForm.addEventListener('input', () => {
       runtimeFormDirty = true;
     });
+    agentModeInput.addEventListener('change', updateAgentEndpointFields);
     runtimeForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       const i18n = getI18n();
       const body = new URLSearchParams();
       body.set('comm_mode', commModeInput.value);
+      body.set('microros_agent_mode', agentModeInput.value);
       body.set('microros_agent_ip', agentIpInput.value.trim());
       body.set('microros_agent_port', agentPortInput.value.trim());
       try {
@@ -1014,6 +1049,7 @@ static const char kProvisionHtmlTemplate[] = R"HTML(
     window.addEventListener('load', () => {
       const lang = new URLSearchParams(window.location.search).get('lang');
       setProvisionLanguage(lang === 'en' ? 'en' : 'zh');
+      updateAgentEndpointFields();
       document.getElementById('network-empty').textContent = getI18n().emptyInitial;
       document.getElementById('camera-status').textContent = getI18n().cameraWaiting;
       scanNetworks();
@@ -1461,6 +1497,7 @@ static esp_err_t status_get_handler(httpd_req_t *req) {
     GamepadMsg gamepad = {};
     TemperatureMsg temperature = {};
     BatteryMsg battery = {};
+    PowerSafetyMsg power_safety = {};
     LidarMsg lidar = {};
 
     const bool has_imu = q_imu_state != nullptr && xQueuePeek(q_imu_state, &imu, 0) == pdTRUE;
@@ -1473,6 +1510,8 @@ static esp_err_t status_get_handler(httpd_req_t *req) {
     const bool has_battery = q_battery_state != nullptr &&
                              xQueuePeek(q_battery_state, &battery, 0) == pdTRUE &&
                              battery.valid;
+    const bool has_power_safety = q_power_safety_state != nullptr &&
+                                  xQueuePeek(q_power_safety_state, &power_safety, 0) == pdTRUE;
     const bool has_lidar = q_lidar_state != nullptr && xQueuePeek(q_lidar_state, &lidar, 0) == pdTRUE;
 
     CameraI2cStatus camera = {};
@@ -1533,6 +1572,12 @@ static esp_err_t status_get_handler(httpd_req_t *req) {
         kStatusJsonSize,
         &offset,
         wifi_comm_mode_to_runtime_value(g_wifi_comm_mode));
+    ok = ok && append_text(s_status_json, kStatusJsonSize, &offset, ",\"microros_agent_mode\":");
+    ok = ok && append_json_string(
+        s_status_json,
+        kStatusJsonSize,
+        &offset,
+        g_microros_agent_auto_discovery ? "auto" : "manual");
     ok = ok && append_text(s_status_json, kStatusJsonSize, &offset, ",\"microros_agent_ip\":");
     ok = ok && append_json_string(s_status_json, kStatusJsonSize, &offset, g_microros_agent_ip);
     ok = ok && append_format(
@@ -1593,12 +1638,32 @@ static esp_err_t status_get_handler(httpd_req_t *req) {
         s_status_json,
         kStatusJsonSize,
         &offset,
-        ",\"battery\":{\"valid\":%s,\"voltage_v\":%.3f,\"adc_voltage_v\":%.4f,\"percentage\":%u,\"raw\":%d}",
+        ",\"battery\":{\"valid\":%s,\"voltage_v\":%.3f,\"adc_voltage_v\":%.4f,\"percentage\":%u,\"raw\":%d,\"sample_seq\":%lu,\"sample_time_ms\":%lu,\"safety\":{\"valid\":%s,\"reason\":\"%s\",\"last_trip_reason\":\"%s\",\"has_sample\":%s,\"adc_valid\":%s,\"sample_fresh\":%s,\"voltage_ready\":%s,\"armed\":%s,\"motion_allowed\":%s,\"recovery_samples\":%u,\"sample_age_ms\":%lu,\"trip_count\":%lu}}",
         has_battery ? "true" : "false",
         has_battery ? battery.voltage_v : 0.0f,
         has_battery ? battery.adc_voltage_v : 0.0f,
         has_battery ? battery.percentage : 0,
-        has_battery ? battery.raw : 0);
+        has_battery ? battery.raw : 0,
+        static_cast<unsigned long>(battery.sample_seq),
+        static_cast<unsigned long>(battery.sample_time_ms),
+        has_power_safety ? "true" : "false",
+        has_power_safety
+            ? BatteryMotionInterlock::ReasonName(
+                  static_cast<BatteryInterlockReason>(power_safety.reason))
+            : "unavailable",
+        has_power_safety
+            ? BatteryMotionInterlock::ReasonName(
+                  static_cast<BatteryInterlockReason>(power_safety.last_trip_reason))
+            : "unavailable",
+        has_power_safety && power_safety.has_sample ? "true" : "false",
+        has_power_safety && power_safety.adc_valid ? "true" : "false",
+        has_power_safety && power_safety.sample_fresh ? "true" : "false",
+        has_power_safety && power_safety.voltage_ready ? "true" : "false",
+        has_power_safety && power_safety.armed ? "true" : "false",
+        has_power_safety && power_safety.motion_allowed ? "true" : "false",
+        has_power_safety ? static_cast<unsigned>(power_safety.recovery_sample_count) : 0U,
+        has_power_safety ? static_cast<unsigned long>(power_safety.sample_age_ms) : 0UL,
+        has_power_safety ? static_cast<unsigned long>(power_safety.trip_count) : 0UL);
 
     ok = ok && append_format(
         s_status_json,
@@ -1852,9 +1917,12 @@ static esp_err_t runtime_config_post_handler(httpd_req_t *req) {
     body[received] = '\0';
 
     char comm_mode_value[16] = {0};
+    char agent_mode_value[8] = {0};
     char agent_ip[16] = {0};
     char agent_port_value[8] = {0};
     extract_form_field(body, "comm_mode", comm_mode_value, sizeof(comm_mode_value));
+    extract_form_field(body, "microros_agent_mode", agent_mode_value,
+                       sizeof(agent_mode_value));
     extract_form_field(body, "microros_agent_ip", agent_ip, sizeof(agent_ip));
     extract_form_field(body, "microros_agent_port", agent_port_value, sizeof(agent_port_value));
 
@@ -1863,21 +1931,43 @@ static esp_err_t runtime_config_post_handler(httpd_req_t *req) {
         httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "invalid comm mode");
         return ESP_FAIL;
     }
-    if (!is_valid_ipv4_address(agent_ip)) {
+
+    if (strcmp(agent_mode_value, "auto") == 0) {
+        config.microros_agent_auto_discovery = true;
+    } else if (strcmp(agent_mode_value, "manual") == 0) {
+        config.microros_agent_auto_discovery = false;
+    } else if (agent_mode_value[0] == '\0' && is_valid_ipv4_address(agent_ip)) {
+        // Backward compatibility for older clients that only posted an IP.
+        config.microros_agent_auto_discovery = false;
+    } else {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST,
+                            "invalid micro-ROS agent mode");
+        return ESP_FAIL;
+    }
+
+    if (!config.microros_agent_auto_discovery &&
+        !is_valid_ipv4_address(agent_ip)) {
         httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "invalid micro-ROS agent IP");
         return ESP_FAIL;
     }
 
     char *port_end = nullptr;
-    const long port = strtol(agent_port_value, &port_end, 10);
-    if (agent_port_value[0] == '\0' || port_end == agent_port_value ||
+    long port = strtol(agent_port_value, &port_end, 10);
+    if (config.microros_agent_auto_discovery && agent_port_value[0] == '\0') {
+        port = 8888;
+        port_end = agent_port_value;
+    } else if (agent_port_value[0] == '\0' || port_end == agent_port_value ||
         *port_end != '\0' || port <= 0 || port > 65535) {
         httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "invalid micro-ROS agent port");
         return ESP_FAIL;
     }
 
-    strncpy(config.microros_agent_ip, agent_ip, sizeof(config.microros_agent_ip) - 1);
-    config.microros_agent_ip[sizeof(config.microros_agent_ip) - 1] = '\0';
+    if (config.microros_agent_auto_discovery) {
+        config.microros_agent_ip[0] = '\0';
+    } else {
+        strncpy(config.microros_agent_ip, agent_ip, sizeof(config.microros_agent_ip) - 1);
+        config.microros_agent_ip[sizeof(config.microros_agent_ip) - 1] = '\0';
+    }
     config.microros_agent_port = static_cast<uint16_t>(port);
 
     esp_err_t err = wifi_save_runtime_config(&config);
@@ -1888,13 +1978,15 @@ static esp_err_t runtime_config_post_handler(httpd_req_t *req) {
     }
 
     g_wifi_comm_mode = config.comm_mode;
+    g_microros_agent_auto_discovery = config.microros_agent_auto_discovery;
     snprintf(g_microros_agent_ip, sizeof(g_microros_agent_ip), "%s",
              config.microros_agent_ip);
     g_microros_agent_port = config.microros_agent_port;
 
-    ESP_LOGI(TAG, "Saved runtime config: comm=%s, micro-ROS agent=%s:%u",
+    ESP_LOGI(TAG, "Saved runtime config: comm=%s, micro-ROS agent_mode=%s, agent=%s:%u",
              wifi_comm_mode_to_runtime_value(g_wifi_comm_mode),
-             g_microros_agent_ip,
+             g_microros_agent_auto_discovery ? "auto" : "manual",
+             g_microros_agent_auto_discovery ? "discovery" : g_microros_agent_ip,
              static_cast<unsigned>(g_microros_agent_port));
     httpd_resp_set_type(req, "application/json");
     httpd_resp_sendstr(req, "{\"ok\":true,\"restart\":true}");

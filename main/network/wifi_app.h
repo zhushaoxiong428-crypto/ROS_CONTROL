@@ -12,6 +12,7 @@ static constexpr size_t kMicroRosAgentIpMaxLen = 16;
 
 struct WifiRuntimeConfig {
     WifiCommMode comm_mode;
+    bool microros_agent_auto_discovery;
     char microros_agent_ip[kMicroRosAgentIpMaxLen];
     uint16_t microros_agent_port;
 };
@@ -23,6 +24,7 @@ esp_err_t wifi_save_sta_credentials(const char *ssid, const char *password);
 esp_err_t wifi_clear_sta_credentials(void);
 bool wifi_get_connected_sta_credentials(char *ssid, size_t ssid_size,
                                         char *password, size_t password_size);
+esp_err_t wifi_get_sta_ip_info(esp_netif_ip_info_t *ip_info);
 esp_err_t wifi_get_softap_ip_info(esp_netif_ip_info_t *ip_info);
 void wifi_get_default_runtime_config(WifiRuntimeConfig *config);
 esp_err_t wifi_load_runtime_config(WifiRuntimeConfig *config);
