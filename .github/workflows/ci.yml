@@ -24,13 +24,28 @@ jobs:
     container: espressif/idf:v5.5
     steps:
       - uses: actions/checkout@v5
+      # micro-ROS 组件在 CMake 配置阶段调用 make 检查预编译库是否需要重编。
+      - name: Install make
+        run: apt-get update && apt-get install -y --no-install-recommends make
       - name: Use committed micro-ROS prebuilt library
-        run: tools/fix_microros_timestamps.sh
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          tools/fix_microros_timestamps.sh
       - name: Build
         shell: bash
         run: |
           . "$IDF_PATH/export.sh"
-          idf.py build
+          set -o pipefail
+          if ! idf.py build 2>&1 | tee build.log; then
+            # 把失败日志末尾作为注解输出，未登录也能在运行摘要里看到原因。
+            grep -nE "error|Error|FAILED" build.log | tail -n 20 | while IFS= read -r line; do
+              echo "::error title=build::${line}"
+            done
+            tail -n 15 build.log | while IFS= read -r line; do
+              echo "::error title=tail::${line}"
+            done
+            exit 1
+          fi
       - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
