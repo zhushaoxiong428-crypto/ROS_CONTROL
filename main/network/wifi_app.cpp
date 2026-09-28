@@ -24,8 +24,8 @@ static const char *kRuntimeCfgCommModeKey = "comm_mode";
 static const char *kRuntimeCfgMicroRosAgentAutoKey = "uros_auto";
 static const char *kRuntimeCfgMicroRosAgentIpKey = "uros_ip";
 static const char *kRuntimeCfgMicroRosAgentPortKey = "uros_port";
-static const char *kDefaultStaSsid = "Maturo";
-static const char *kDefaultStaPassword = "maturo2026";
+static const char *kDefaultStaSsid = CONFIG_LEAP_DEFAULT_STA_SSID;
+static const char *kDefaultStaPassword = CONFIG_LEAP_DEFAULT_STA_PASSWORD;
 static constexpr uint16_t kDefaultMicroRosAgentPort = 8888;
 static constexpr esp_err_t kProvisionOnlyCredentials = ESP_ERR_INVALID_STATE;
 

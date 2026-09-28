@@ -1,5 +1,16 @@
 menu "Leap low settings"
 
+    config LEAP_DEFAULT_STA_SSID
+        string "Fallback Wi-Fi SSID when no credentials are saved"
+        default "Maturo"
+        help
+            Used only before provisioning. Saved credentials from the
+            provisioning page always take precedence.
+
+    config LEAP_DEFAULT_STA_PASSWORD
+        string "Fallback Wi-Fi password when no credentials are saved"
+        default "maturo2026"
+
     config MICRO_ROS_LOCAL_PORT
         string "micro-ROS local UDP port"
         default "8888"
