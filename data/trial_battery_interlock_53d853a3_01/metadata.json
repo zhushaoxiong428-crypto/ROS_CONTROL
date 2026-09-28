@@ -1,0 +1,32 @@
+{
+  "schema_version": 2,
+  "started_utc": "2026-09-28T00:13:37.129934+00:00",
+  "clock": "host time.monotonic_ns relative to trial start",
+  "firmware_id": "battery_interlock_53d853a3",
+  "settings": {
+    "speed_mps": 0.05,
+    "drive_seconds": 1.5,
+    "zero_seconds": 2.0,
+    "rate_hz": 20.0,
+    "wait_seconds": 10.0
+  },
+  "safety_limits": {
+    "battery_min_inclusive_v": 6.4,
+    "battery_max_inclusive_v": 8.5,
+    "battery_stable_seconds": 1.0,
+    "battery_freshness_seconds": 1.0,
+    "interlock_rearm_zero_seconds": 0.3
+  },
+  "status": "completed",
+  "reason": "target/PWM zero observed before watchdog; wheel speeds later settled",
+  "last_drive_tx_to_zero_target_pwm_observed_s": 0.085232623,
+  "zero_target_pwm_observed_inside_watchdog_window": true,
+  "motor_samples": 243,
+  "battery_samples": 49,
+  "cmd_messages": 77,
+  "battery_before_drive_v": 7.918298721313477,
+  "battery_min_during_drive_v": 7.89484167098999,
+  "battery_after_stop_v": 7.915952682495117,
+  "last_drive_tx_to_first_zero_tx_s": 0.04983961,
+  "finished_utc": "2026-09-28T00:13:42.006259+00:00"
+}

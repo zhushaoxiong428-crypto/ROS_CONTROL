@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "started_utc": "2026-09-24T11:17:10.326441+00:00",
+  "clock": "host time.monotonic_ns relative to trial start",
+  "firmware_id": "startup_release_300ms_75ace2c7",
+  "settings": {
+    "speed_mps": 0.05,
+    "drive_seconds": 1.5,
+    "zero_seconds": 2.0,
+    "rate_hz": 20.0,
+    "wait_seconds": 10.0
+  },
+  "status": "completed",
+  "reason": "target/PWM zero observed before watchdog; wheel speeds later settled",
+  "last_drive_tx_to_zero_target_pwm_observed_s": 0.084652909,
+  "zero_target_pwm_observed_inside_watchdog_window": true,
+  "motor_samples": 190,
+  "battery_samples": 38,
+  "cmd_messages": 71,
+  "battery_before_drive_v": 8.045947074890137,
+  "battery_min_during_drive_v": 8.029526710510254,
+  "battery_after_stop_v": 8.046924591064453,
+  "last_drive_tx_to_first_zero_tx_s": 0.049773241,
+  "finished_utc": "2026-09-24T11:17:14.363778+00:00"
+}

@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "started_utc": "2026-09-23T23:35:51.369740+00:00",
+  "clock": "host time.monotonic_ns relative to trial start",
+  "firmware_id": "scan320_be_4291b77a",
+  "settings": {
+    "speed_mps": 0.05,
+    "drive_seconds": 1.5,
+    "zero_seconds": 2.0,
+    "rate_hz": 20.0,
+    "wait_seconds": 15.0
+  },
+  "status": "completed",
+  "reason": "target/PWM zero observed before watchdog; wheel speeds later settled",
+  "last_drive_tx_to_zero_target_pwm_observed_s": 0.115531205,
+  "zero_target_pwm_observed_inside_watchdog_window": true,
+  "motor_samples": 183,
+  "battery_samples": 38,
+  "cmd_messages": 71,
+  "battery_before_drive_v": 7.578360080718994,
+  "battery_min_during_drive_v": 7.557833671569824,
+  "battery_after_stop_v": 7.57503604888916,
+  "last_drive_tx_to_first_zero_tx_s": 0.050004157,
+  "finished_utc": "2026-09-23T23:35:55.411574+00:00"
+}
