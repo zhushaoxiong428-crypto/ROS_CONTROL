@@ -27,10 +27,10 @@ jobs:
       # micro-ROS 组件在 CMake 配置阶段调用 make 检查预编译库是否需要重编。
       - name: Install make
         run: apt-get update && apt-get install -y --no-install-recommends make
-      - name: Use committed micro-ROS prebuilt library
+      - name: Prepare build (lock path, micro-ROS prebuilt)
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          tools/fix_microros_timestamps.sh
+          tools/prepare_build.sh
       - name: Build
         shell: bash
         run: |
