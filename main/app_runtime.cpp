@@ -16,6 +16,7 @@
 #include "msg/gamepad_msg.h"
 #include "msg/imu_msg.h"
 #include "msg/battery_msg.h"
+#include "msg/power_safety_msg.h"
 #include "msg/lidar_msg.h"
 #include "msg/motion_msg.h"
 #include "msg/pid_msg.h"
@@ -25,6 +26,7 @@
 #include "nvs_flash.h"
 #include "system_globals.h"
 #include "wifi_app.h"
+#include "msg/motor_debug_msg.h"
 
 static const char *TAG = "APP_RUNTIME";
 
@@ -113,14 +115,20 @@ static void init_runtime_config(void) {
     }
 
     g_wifi_comm_mode = config.comm_mode;
+    g_microros_agent_auto_discovery = config.microros_agent_auto_discovery;
     snprintf(g_microros_agent_ip, sizeof(g_microros_agent_ip), "%s",
              config.microros_agent_ip);
     g_microros_agent_port = config.microros_agent_port;
 
-    ESP_LOGI(TAG, "Runtime config: comm=%s, micro-ROS agent=%s:%u",
-             wifi_comm_mode_to_runtime_value(g_wifi_comm_mode),
-             g_microros_agent_ip,
-             static_cast<unsigned>(g_microros_agent_port));
+    if (g_microros_agent_auto_discovery) {
+        ESP_LOGI(TAG, "Runtime config: comm=%s, micro-ROS agent=auto",
+                 wifi_comm_mode_to_runtime_value(g_wifi_comm_mode));
+    } else {
+        ESP_LOGI(TAG, "Runtime config: comm=%s, micro-ROS agent=manual %s:%u",
+                 wifi_comm_mode_to_runtime_value(g_wifi_comm_mode),
+                 g_microros_agent_ip,
+                 static_cast<unsigned>(g_microros_agent_port));
+    }
 }
 
 static void init_pid_config(void) {
@@ -142,11 +150,13 @@ static void init_pid_config(void) {
 static void create_runtime_queues(void) {
     q_imu_state = xQueueCreate(1, sizeof(ImuMsg));
     q_motion_state = xQueueCreate(1, sizeof(MotionMsg));
+    q_motor_debug_state = xQueueCreate(1, sizeof(MotorDebugMsg));
     q_ultrasonic_state = xQueueCreate(1, sizeof(UltrasonicMsg));
     q_lidar_state = xQueueCreate(1, sizeof(LidarMsg));
     q_gamepad_state = xQueueCreate(1, sizeof(GamepadMsg));
     q_temperature_state = xQueueCreate(1, sizeof(TemperatureMsg));
     q_battery_state = xQueueCreate(1, sizeof(BatteryMsg));
+    q_power_safety_state = xQueueCreate(1, sizeof(PowerSafetyMsg));
     q_motion_cmd = xQueueCreate(1, sizeof(MotionMsg));
     q_servo_cmd = xQueueCreate(1, sizeof(ServoMsg));
     q_speedpid_cmd = xQueueCreate(1, sizeof(PidMsg));

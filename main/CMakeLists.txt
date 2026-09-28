@@ -5,6 +5,8 @@ set(APP_SRCS
     "core/system_globals.cpp"
     "platform/board.cpp"
     "control/motion_controller.cpp"
+    "control/battery_motion_interlock.cpp"
+    "control/wheel_pair_controller.cpp"
     "tasks/control/motion_task.cpp"
     "tasks/sensors/imu_task.cpp"
     "tasks/sensors/ultrasonic_task.cpp"

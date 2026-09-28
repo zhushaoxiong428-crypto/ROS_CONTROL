@@ -3,6 +3,7 @@
 #include "msg/battery_msg.h"
 
 #include "esp_log.h"
+#include "esp_timer.h"
 
 static const char *TAG = "BATTERY_TASK";
 static constexpr TickType_t kBatterySampleTicks = pdMS_TO_TICKS(500);
@@ -16,6 +17,8 @@ void battery_task(void *p) {
         return;
     }
 
+    TickType_t last_wake_time = xTaskGetTickCount();
+    uint32_t sample_seq = 0;
     while (1) {
         BatteryAdcReading reading = battery_adc.Read();
         BatteryMsg msg = {};
@@ -24,9 +27,11 @@ void battery_task(void *p) {
         msg.percentage = reading.percentage;
         msg.raw = reading.raw;
         msg.valid = reading.valid;
+        msg.sample_seq = ++sample_seq;
+        msg.sample_time_ms = static_cast<uint32_t>(esp_timer_get_time() / 1000);
         if (q_battery_state != nullptr) {
             xQueueOverwrite(q_battery_state, &msg);
         }
-        vTaskDelay(kBatterySampleTicks);
+        vTaskDelayUntil(&last_wake_time, kBatterySampleTicks);
     }
 }

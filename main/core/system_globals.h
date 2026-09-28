@@ -32,6 +32,7 @@ extern volatile bool g_emergency_stop;
 extern volatile bool g_motion_busy;
 extern volatile uint32_t g_lidar_scan_sequence;
 extern volatile WifiCommMode g_wifi_comm_mode;
+extern bool g_microros_agent_auto_discovery;
 extern char g_microros_agent_ip[16];
 extern uint16_t g_microros_agent_port;
 extern char g_device_name[32];
@@ -40,11 +41,13 @@ extern MavlinkStatustextInfo g_mavlink_statustext;
 // ================= 消息队列句柄 =================
 extern QueueHandle_t q_imu_state;
 extern QueueHandle_t q_motion_state;
+extern QueueHandle_t q_motor_debug_state;
 extern QueueHandle_t q_ultrasonic_state;
 extern QueueHandle_t q_lidar_state;   
 extern QueueHandle_t q_gamepad_state;
 extern QueueHandle_t q_temperature_state;
 extern QueueHandle_t q_battery_state;
+extern QueueHandle_t q_power_safety_state;
 
 
 extern QueueHandle_t q_motion_cmd;

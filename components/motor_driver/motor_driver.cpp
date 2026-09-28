@@ -1,4 +1,5 @@
 #include "motor_driver.h"
+#include "esp_log.h"
 
 // 静态变量分配唯一的 LEDC 通道，S3 有 8 个通道 (LEDC_CHANNEL_0 ~ LEDC_CHANNEL_7)
 static ledc_channel_t next_ledc_channel = LEDC_CHANNEL_0;
@@ -49,6 +50,12 @@ void At8236Motor::Init() {
   ledc_channel_2.channel  = channel_in2_;
   ledc_channel_2.gpio_num = in2_pin_;
   ledc_channel_config(&ledc_channel_2);
+  ESP_LOGI("MOTOR",
+         "Init success IN1=%d IN2=%d CH1=%d CH2=%d",
+         in1_pin_,
+         in2_pin_,
+         channel_in1_,
+         channel_in2_);
   initialized_ = true;
 }
 

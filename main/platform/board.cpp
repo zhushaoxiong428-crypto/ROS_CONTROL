@@ -50,6 +50,9 @@ void board_init(void) {
     encoder_left.Init();
     motor_right.Init();
     encoder_right.Init();
+    // Motion permission starts closed until the battery interlock has seen a
+    // stable 2S supply and an explicit all-stop re-arm command.
+    robot.SetMotionEnabled(false);
 
     ultrasonic.Init();
     status_led.Init();
