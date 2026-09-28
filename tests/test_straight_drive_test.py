@@ -46,6 +46,16 @@ class AnalyzeTest(unittest.TestCase):
         self.assertIn("mechanical", report.diagnosis)
         self.assertAlmostEqual(report.lateral_offset_m, 0.0, places=6)  # odom sees straight
 
+    def test_straight_but_encoders_disagree_is_scale_mismatch(self):
+        # 航向保持把车拉直了，编码器却推算出右转（本次实测的情形）。
+        samples = arc(0.0, 1.0)
+        for i, sample in enumerate(samples):
+            sample.odom_yaw = -math.radians(20.0) * i / (len(samples) - 1)
+        report = analyze(samples)
+        self.assertTrue(report.diagnosis.startswith("straight"))
+        self.assertIn("scale mismatch", report.diagnosis)
+        self.assertIn("right turn", report.diagnosis)
+
     def test_right_drift_and_mixed(self):
         report = analyze(arc(-1.0, 0.4))
         self.assertIn("drifts right", report.diagnosis)

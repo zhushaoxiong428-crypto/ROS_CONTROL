@@ -69,6 +69,14 @@ def analyze(samples: list[Sample]) -> DriftReport:
 
     if abs(imu_yaw) < STRAIGHT_TOLERANCE_DEG:
         diagnosis = "straight: IMU heading change within tolerance"
+        mismatch = encoder_yaw - imu_yaw
+        if abs(mismatch) >= STRAIGHT_TOLERANCE_DEG:
+            # 车实际走直，但编码器推算出转弯：两轮每个脉冲对应的行程不同。
+            # 左右轮行程差 = 航向差 × 轮距，据此给出右/左比例。
+            side = "right" if mismatch < 0 else "left"
+            diagnosis += (f"; but encoders report a {abs(mismatch):.1f} deg {side} turn: "
+                          "per-wheel scale mismatch (gear ratio / wheel diameter), "
+                          "odometry is wrong")
     else:
         side = "left" if imu_yaw > 0 else "right"
         ratio = encoder_yaw / imu_yaw
