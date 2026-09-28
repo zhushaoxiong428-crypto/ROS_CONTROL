@@ -65,8 +65,19 @@ Agent。手机热点等设备即使禁止客户端组播，固件也会自动使
 | 话题 | 类型 | QoS | 映射 |
 | --- | --- | --- | --- |
 | `/cmd_vel` | `geometry_msgs/msg/Twist` | sensor data | `linear.x/y` 由 m/s 转为目标 `vx/vy`，单位 mm/s；`angular.z` 转为目标 `wz`，单位 rad/s |
+| `/emergency_stop` | `std_msgs/msg/Bool` | reliable | `true` 锁存急停并立即制动；`false` 释放急停 |
 
-收到 `/cmd_vel` 后会向 `q_motion_cmd` 写入速度指令，将控制来源标记为 micro-ROS，并清除 `g_emergency_stop`。所有运动命令仍须通过电池运动互锁；MCU 启动或电池故障恢复后，必须先收到一条所有线速度和角速度均为零的 mode 0 命令，下一条非零命令才可执行。详见 [电池运动互锁](power_motion_interlock.md)。
+收到 `/cmd_vel` 后会按顺序写入 `q_motion_cmd`（深度 8，满时丢弃最旧一条），将控制来源标记为 micro-ROS。运动命令**不会**清除急停。
+
+急停（`/emergency_stop`、MAVLink DISARM 或板载 BOOT 键均可触发）锁存期间，电机持续制动，所有运动命令被丢弃。释放急停后，必须先收到一条全零的 mode 0 速度命令，之后的非零命令才会执行，例如：
+
+```bash
+ros2 topic pub --once /emergency_stop std_msgs/msg/Bool "{data: true}"   # 急停
+ros2 topic pub --once /emergency_stop std_msgs/msg/Bool "{data: false}"  # 释放
+ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist "{}"              # 重新武装
+```
+
+所有运动命令仍须通过电池运动互锁；MCU 启动或电池故障恢复后，必须先收到一条所有线速度和角速度均为零的 mode 0 命令，下一条非零命令才可执行。详见 [电池运动互锁](power_motion_interlock.md)。
 
 ### 发布话题
 
@@ -172,8 +183,8 @@ Agent。手机热点等设备即使禁止客户端组播，固件也会自动使
 
 | 指令 | 参数 | 结果 |
 | --- | --- | --- |
-| `MAV_CMD_COMPONENT_ARM_DISARM` | `param1 < 0.5`：停止；否则清除急停 | `ACCEPTED` |
-| `MAV_CMD_PREFLIGHT_SET_SENSOR_OFFSETS` | 无 | 复位里程计 |
+| `MAV_CMD_COMPONENT_ARM_DISARM` | `param1 < 0.5`：锁存急停并停车；否则释放急停（之后仍需一条零速命令重新武装） | `ACCEPTED` |
+| `MAV_CMD_PREFLIGHT_SET_SENSOR_OFFSETS` | 无 | 请求复位里程计，由控制任务在下一个 20 ms 周期执行 | `ACCEPTED` |
 | `MAV_CMD_DO_SET_SERVO` | `param2`：舵机角度 | 写入 `q_servo_cmd` |
 | `MAV_CMD_DO_SET_ACTUATOR` | `param1`：左轮目标，`param2`：右轮目标 | 轮速模式 |
 | `MAV_CMD_USER_2` | `param1`：相对距离，`param2`：相对航向角 | 相对运动模式 |
@@ -288,6 +299,8 @@ MAVLink 电池字段：
 网页运行配置会将通信模式和 Agent 查找方式保存到 NVS。自动发现模式不会保存解析到的
 Agent IP；手动模式才会保存用户填写的 IP 与端口。
 
-## BOOT 键回到配网模式
+## BOOT 键：急停与回到配网模式
+
+按下 BOOT 键会立即锁存急停（见 micro-ROS 订阅话题一节），需要上位机显式释放。
 
 运行时长按 BOOT 键约 3 秒会清除已保存的 Wi-Fi STA 配置，状态灯进入快闪。松开 BOOT 键后设备会重启，并进入 Wi-Fi 配网模式。

@@ -157,13 +157,15 @@ static void create_runtime_queues(void) {
     q_temperature_state = xQueueCreate(1, sizeof(TemperatureMsg));
     q_battery_state = xQueueCreate(1, sizeof(BatteryMsg));
     q_power_safety_state = xQueueCreate(1, sizeof(PowerSafetyMsg));
-    q_motion_cmd = xQueueCreate(1, sizeof(MotionMsg));
+    // 运动命令需要按到达顺序逐条处理（零速武装命令不能被下一条命令覆盖），
+    // 8 条足够覆盖一个 20 ms 控制周期内的突发。
+    q_motion_cmd = xQueueCreate(8, sizeof(MotionMsg));
     q_servo_cmd = xQueueCreate(1, sizeof(ServoMsg));
     q_speedpid_cmd = xQueueCreate(1, sizeof(PidMsg));
     if (q_speedpid_cmd != nullptr) {
         xQueueOverwrite(q_speedpid_cmd, &g_speed_pid_state);
     }
-    q_postionpid_cmd = xQueueCreate(1, sizeof(PidMsg));
+    q_position_pid_cmd = xQueueCreate(1, sizeof(PidMsg));
 }
 
 void app_runtime_startup(void) {

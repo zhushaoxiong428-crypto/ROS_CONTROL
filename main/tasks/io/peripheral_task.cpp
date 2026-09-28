@@ -85,6 +85,11 @@ void peripheral_task(void *p) {
 
         if (button_state_changed) {
             if (button_pressed) {
+                // BOOT 键作为板载急停：按下立即锁存，需上位机显式释放。
+                if (!motion_emergency_stop_active()) {
+                    motion_emergency_stop_set(true);
+                    ESP_LOGW(TAG, "Emergency stop LATCHED by BOOT button");
+                }
                 press_start_tick = now;
                 wifi_reset_requested = false;
             } else {

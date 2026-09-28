@@ -23,6 +23,7 @@
 #include "agent_ping_health.h"
 #include "laser_scan_downsampler.h"
 #include "publish_probe_stats.h"
+#include "std_msgs/msg/bool.h"
 #include "std_msgs/msg/float32_multi_array.h"
 
 #include "geometry_msgs/msg/twist.h"
@@ -129,6 +130,8 @@ static rcl_publisher_t s_scan_publisher = {};
 static rcl_publisher_t s_battery_publisher = {};
 static rcl_publisher_t s_ultrasonic_publisher = {};
 static rcl_subscription_t s_cmd_vel_subscriber = {};
+static rcl_subscription_t s_estop_subscriber = {};
+static std_msgs__msg__Bool s_estop_msg = {};
 static rcl_service_t s_set_speed_pid_service = {};
 static rcl_service_t s_get_speed_pid_service = {};
 static rclc_executor_t s_service_executor = {};
@@ -157,6 +160,7 @@ static bool s_battery_msg_initialized = false;
 static bool s_battery_publisher_initialized = false;
 static bool s_ultrasonic_publisher_initialized = false;
 static bool s_cmd_vel_subscriber_initialized = false;
+static bool s_estop_subscriber_initialized = false;
 static bool s_set_speed_pid_service_initialized = false;
 static bool s_get_speed_pid_service_initialized = false;
 static bool s_service_executor_initialized = false;
@@ -451,6 +455,7 @@ static void reset_ros_handles()
     s_battery_publisher = rcl_get_zero_initialized_publisher();
     s_ultrasonic_publisher = rcl_get_zero_initialized_publisher();
     s_cmd_vel_subscriber = rcl_get_zero_initialized_subscription();
+    s_estop_subscriber = rcl_get_zero_initialized_subscription();
     s_set_speed_pid_service = rcl_get_zero_initialized_service();
     s_get_speed_pid_service = rcl_get_zero_initialized_service();
     s_service_executor = rclc_executor_get_zero_initialized_executor();
@@ -475,8 +480,22 @@ static void handle_cmd_vel(const geometry_msgs__msg__Twist *msg)
     cmd.target_vx = static_cast<float>(msg->linear.x * 1000.0);
     cmd.target_vy = static_cast<float>(msg->linear.y * 1000.0);
     cmd.target_wz = static_cast<float>(msg->angular.z);
-    xQueueOverwrite(q_motion_cmd, &cmd);
-    g_emergency_stop = false;
+    (void)motion_command_submit(cmd);
+}
+
+// /emergency_stop: true 锁存急停，false 释放。释放后仍需新的运动命令才会动。
+static void handle_emergency_stop(const std_msgs__msg__Bool *msg)
+{
+    if (msg == nullptr)
+    {
+        return;
+    }
+    const bool was_active = motion_emergency_stop_active();
+    motion_emergency_stop_set(msg->data);
+    if (was_active != msg->data)
+    {
+        ESP_LOGW(TAG, "Emergency stop %s via /emergency_stop", msg->data ? "LATCHED" : "released");
+    }
 }
 
 static void set_speed_pid_response(
@@ -1140,6 +1159,18 @@ static bool create_ros_entities()
         &sub_options));
     s_cmd_vel_subscriber_initialized = true;
 
+    // 急停必须可靠送达，因此使用默认（Reliable）QoS，而不是 sensor_data。
+    rcl_subscription_options_t estop_options = rcl_subscription_get_default_options();
+    estop_options.qos = rmw_qos_profile_default;
+    s_estop_subscriber = rcl_get_zero_initialized_subscription();
+    RCCHECK(rcl_subscription_init(
+        &s_estop_subscriber,
+        &s_node,
+        ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Bool),
+        "emergency_stop",
+        &estop_options));
+    s_estop_subscriber_initialized = true;
+
     rcl_service_options_t service_options = rcl_service_get_default_options();
     service_options.qos = rmw_qos_profile_services_default;
     RCCHECK(rcl_service_init(
@@ -1187,7 +1218,7 @@ static bool create_ros_entities()
     s_timer_initialized = true;
 
     s_wait_set = rcl_get_zero_initialized_wait_set();
-    RCCHECK(rcl_wait_set_init(&s_wait_set, 1, 0, 1, 0, 0, 0, &s_context, s_allocator));
+    RCCHECK(rcl_wait_set_init(&s_wait_set, 2, 0, 1, 0, 0, 0, &s_context, s_allocator));
     s_wait_set_initialized = true;
     s_ros_created = true;
     return true;
@@ -1264,6 +1295,11 @@ static void destroy_ros_entities()
         cleanup_result(rcl_subscription_fini(&s_cmd_vel_subscriber, &s_node));
         s_cmd_vel_subscriber_initialized = false;
     }
+    if (s_estop_subscriber_initialized)
+    {
+        cleanup_result(rcl_subscription_fini(&s_estop_subscriber, &s_node));
+        s_estop_subscriber_initialized = false;
+    }
     if (s_service_executor_initialized)
     {
         cleanup_result(rclc_executor_fini(&s_service_executor));
@@ -1336,6 +1372,10 @@ static bool spin_once(int timeout_ms)
         return false;
     }
     ret = rcl_wait_set_add_subscription(&s_wait_set, &s_cmd_vel_subscriber, nullptr);
+    if (ret == RCL_RET_OK)
+    {
+        ret = rcl_wait_set_add_subscription(&s_wait_set, &s_estop_subscriber, nullptr);
+    }
     if (ret != RCL_RET_OK)
     {
         ESP_LOGW(TAG, "rcl_wait_set_add_subscription failed: %d", static_cast<int>(ret));
@@ -1360,6 +1400,20 @@ static bool spin_once(int timeout_ms)
     {
         ESP_LOGW(TAG, "rcl_wait failed: %d", static_cast<int>(ret));
         return false;
+    }
+
+    // 先处理急停，再处理同一轮到达的 cmd_vel。
+    if (s_wait_set.subscriptions[1] != nullptr)
+    {
+        const rcl_ret_t take_ret = rcl_take(&s_estop_subscriber, &s_estop_msg, nullptr, nullptr);
+        if (take_ret == RCL_RET_OK)
+        {
+            handle_emergency_stop(&s_estop_msg);
+        }
+        else if (take_ret != RCL_RET_SUBSCRIPTION_TAKE_FAILED)
+        {
+            ESP_LOGW(TAG, "rcl_take(emergency_stop) failed: %d", static_cast<int>(take_ret));
+        }
     }
 
     if (s_wait_set.subscriptions[0] != nullptr)

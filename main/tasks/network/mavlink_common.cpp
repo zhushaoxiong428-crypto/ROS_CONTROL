@@ -453,7 +453,7 @@ static QueueHandle_t GetPidQueue(uint8_t target) {
         case MATURO_PARAM_SPEED_PID:
             return q_speedpid_cmd;
         case MATURO_PARAM_POSITION_PID:
-            return q_postionpid_cmd;
+            return q_position_pid_cmd;
         default:
             return nullptr;
     }
@@ -832,8 +832,7 @@ static void HandleParamSet(
 
 static void SendMotionCommand(const MotionMsg &cmd) {
     s_mavlink_motion_mode = cmd.control_mode;
-    xQueueOverwrite(q_motion_cmd, &cmd);
-    g_emergency_stop = false;
+    (void)motion_command_submit(cmd);
 }
 
 static uint8_t HandleSetPositionTargetLocalNed(const mavlink_message_t *msg, uint8_t motion_source) {
@@ -882,6 +881,8 @@ static uint8_t HandleCommandLong(const mavlink_message_t *msg, uint8_t motion_so
     switch (command.command) {
         case MAV_CMD_COMPONENT_ARM_DISARM: {
             if (command.param1 < 0.5f) {
+                // DISARM 锁存急停，motion_task 会立即制动并丢弃后续运动命令。
+                motion_emergency_stop_set(true);
                 MotionMsg stop_cmd = {};
                 stop_cmd.source = motion_source;
                 stop_cmd.control_mode = MATURO_MOTION_VELOCITY;
@@ -889,11 +890,11 @@ static uint8_t HandleCommandLong(const mavlink_message_t *msg, uint8_t motion_so
                 g_motion_busy = false;
                 return MAV_RESULT_ACCEPTED;
             }
-            g_emergency_stop = false;
+            motion_emergency_stop_set(false);
             return MAV_RESULT_ACCEPTED;
         }
         case MAV_CMD_PREFLIGHT_SET_SENSOR_OFFSETS: {
-            robot.ResetOdometry();
+            motion_request_odometry_reset();
             return MAV_RESULT_ACCEPTED;
         }
         case MAV_CMD_DO_SET_SERVO: {
@@ -938,7 +939,7 @@ static uint8_t HandleCommandLong(const mavlink_message_t *msg, uint8_t motion_so
                     xQueueOverwrite(q_speedpid_cmd, &pid_msg);
                     return MAV_RESULT_ACCEPTED;
                 case MATURO_PID_POSITION:
-                    xQueueOverwrite(q_postionpid_cmd, &pid_msg);
+                    xQueueOverwrite(q_position_pid_cmd, &pid_msg);
                     return MAV_RESULT_ACCEPTED;
                 default:
                     return MAV_RESULT_DENIED;

@@ -1,6 +1,10 @@
 #include "system_globals.h"
 
-volatile bool g_emergency_stop = false;
+#include <atomic>
+
+static std::atomic<bool> s_emergency_stop{false};
+static std::atomic<bool> s_odometry_reset_requested{false};
+
 volatile bool g_motion_busy = false;
 volatile uint32_t g_lidar_scan_sequence = 0;
 volatile WifiCommMode g_wifi_comm_mode = WifiCommMode::kMicroRos;
@@ -75,7 +79,7 @@ QueueHandle_t q_power_safety_state = nullptr;
 QueueHandle_t q_motion_cmd = nullptr;
 QueueHandle_t q_servo_cmd = nullptr;
 QueueHandle_t q_speedpid_cmd = nullptr;
-QueueHandle_t q_postionpid_cmd = nullptr;
+QueueHandle_t q_position_pid_cmd = nullptr;
 
 PidMsg g_speed_pid_state = {
     .kp = 1.2f,
@@ -88,3 +92,31 @@ PidMsg g_position_pid_state = {
     .ki = 0.0f,
     .kd = 0.5f,
 };
+
+bool motion_command_submit(const MotionMsg &cmd) {
+    if (q_motion_cmd == nullptr) {
+        return false;
+    }
+    if (xQueueSend(q_motion_cmd, &cmd, 0) == pdTRUE) {
+        return true;
+    }
+    MotionMsg dropped;
+    (void)xQueueReceive(q_motion_cmd, &dropped, 0);
+    return xQueueSend(q_motion_cmd, &cmd, 0) == pdTRUE;
+}
+
+void motion_emergency_stop_set(bool active) {
+    s_emergency_stop.store(active);
+}
+
+bool motion_emergency_stop_active() {
+    return s_emergency_stop.load();
+}
+
+void motion_request_odometry_reset() {
+    s_odometry_reset_requested.store(true);
+}
+
+bool motion_take_odometry_reset_request() {
+    return s_odometry_reset_requested.exchange(false);
+}

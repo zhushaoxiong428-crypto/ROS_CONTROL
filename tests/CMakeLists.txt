@@ -47,6 +47,12 @@ target_compile_features(battery_motion_interlock_test PRIVATE cxx_std_17)
 target_compile_options(battery_motion_interlock_test PRIVATE -Wall -Wextra -Werror)
 add_test(NAME battery_motion_interlock_test COMMAND battery_motion_interlock_test)
 
+add_executable(emergency_stop_gate_test emergency_stop_gate_test.cpp)
+target_include_directories(emergency_stop_gate_test PRIVATE ../main/control)
+target_compile_features(emergency_stop_gate_test PRIVATE cxx_std_17)
+target_compile_options(emergency_stop_gate_test PRIVATE -Wall -Wextra -Werror)
+add_test(NAME emergency_stop_gate_test COMMAND emergency_stop_gate_test)
+
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 add_test(
     NAME analyze_motor_startup_test

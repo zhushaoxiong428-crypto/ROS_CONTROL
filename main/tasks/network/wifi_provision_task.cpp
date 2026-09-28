@@ -1559,7 +1559,7 @@ static esp_err_t status_get_handler(httpd_req_t *req) {
         &offset,
         ",\"uptime_ms\":%lu,\"emergency_stop\":%s,\"motion_busy\":%s,\"wifi_comm_mode\":",
         static_cast<unsigned long>(xTaskGetTickCount() * portTICK_PERIOD_MS),
-        g_emergency_stop ? "true" : "false",
+        motion_emergency_stop_active() ? "true" : "false",
         g_motion_busy ? "true" : "false");
     ok = ok && append_json_string(
         s_status_json,
