@@ -35,9 +35,12 @@
 
 ## 构建与测试
 
-先加载 ESP-IDF 5.5 环境，再构建固件：
+先加载 ESP-IDF 5.5 环境，再构建固件。克隆后第一次构建前先运行一次
+`tools/fix_microros_timestamps.sh`，否则 git 打乱的文件时间戳可能触发 micro-ROS
+从源码完整重编（需要 colcon 和联网）：
 
 ```bash
+tools/fix_microros_timestamps.sh
 . ~/esp/esp-idf/export.sh
 idf.py build
 ```
