@@ -4,6 +4,10 @@
 
 `leap_ros_mcu_driver` 是 Leap_ROS 底盘的 ESP32-S3 下位机驱动固件，用于电机控制、里程计、IMU、雷达、超声波、电池状态、状态灯和外设数据采集。固件支持 micro-ROS 与 MAVLink 通信模式，并提供 Wi-Fi 配网页用于运行参数配置。
 
+> 本仓库基于开源项目 [LEAP ROS2](https://github.com/czu963889306-dev/leap_ros2) 的下位机固件
+> [leap_ros_mcu_driver](https://github.com/czu963889306-dev/leap_ros_mcu_driver)（v1.5）进行二次开发，
+> 保留了上游提交历史。上游之后的改动见下方各节与提交记录。
+
 ## v1.5 更新内容
 
 - 支持通过服务通讯修改速度 PID 参数，并提供获取 PID 参数服务。
