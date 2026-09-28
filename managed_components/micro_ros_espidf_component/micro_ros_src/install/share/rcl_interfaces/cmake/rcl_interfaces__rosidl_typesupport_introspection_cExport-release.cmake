@@ -12,8 +12,8 @@ set_target_properties(rcl_interfaces::rcl_interfaces__rosidl_typesupport_introsp
   IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib/librcl_interfaces__rosidl_typesupport_introspection_c.a"
   )
 
-list(APPEND _cmake_import_check_targets rcl_interfaces::rcl_interfaces__rosidl_typesupport_introspection_c )
-list(APPEND _cmake_import_check_files_for_rcl_interfaces::rcl_interfaces__rosidl_typesupport_introspection_c "${_IMPORT_PREFIX}/lib/librcl_interfaces__rosidl_typesupport_introspection_c.a" )
+list(APPEND _IMPORT_CHECK_TARGETS rcl_interfaces::rcl_interfaces__rosidl_typesupport_introspection_c )
+list(APPEND _IMPORT_CHECK_FILES_FOR_rcl_interfaces::rcl_interfaces__rosidl_typesupport_introspection_c "${_IMPORT_PREFIX}/lib/librcl_interfaces__rosidl_typesupport_introspection_c.a" )
 
 # Commands beyond this point should not need to know the version.
 set(CMAKE_IMPORT_FILE_VERSION)

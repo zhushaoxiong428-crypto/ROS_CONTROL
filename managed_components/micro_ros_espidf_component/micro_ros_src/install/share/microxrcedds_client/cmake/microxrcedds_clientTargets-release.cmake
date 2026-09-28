@@ -12,8 +12,8 @@ set_target_properties(microxrcedds_client PROPERTIES
   IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib/libmicroxrcedds_client.a"
   )
 
-list(APPEND _cmake_import_check_targets microxrcedds_client )
-list(APPEND _cmake_import_check_files_for_microxrcedds_client "${_IMPORT_PREFIX}/lib/libmicroxrcedds_client.a" )
+list(APPEND _IMPORT_CHECK_TARGETS microxrcedds_client )
+list(APPEND _IMPORT_CHECK_FILES_FOR_microxrcedds_client "${_IMPORT_PREFIX}/lib/libmicroxrcedds_client.a" )
 
 # Commands beyond this point should not need to know the version.
 set(CMAKE_IMPORT_FILE_VERSION)

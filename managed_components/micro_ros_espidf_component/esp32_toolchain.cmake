@@ -3,7 +3,7 @@ include(CMakeForceCompiler)
 set(CMAKE_SYSTEM_NAME Generic)
 
 set(idf_target "esp32s3")
-set(idf_path "/root/esp/esp-idf")
+set(idf_path "/home/wrj/esp/esp-idf")
 
 set(RISCV_TARGETS "esp32c3" "esp32c6" "esp32p4")
 set(RISCV_HARD_FLOAT_TARGETS "esp32p4")
@@ -30,8 +30,8 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
-set(CMAKE_C_COMPILER /root/.espressif/tools/xtensa-esp-elf/esp-14.2.0_20251107/xtensa-esp-elf/bin/xtensa-esp32s3-elf-gcc)
-set(CMAKE_CXX_COMPILER /root/.espressif/tools/xtensa-esp-elf/esp-14.2.0_20251107/xtensa-esp-elf/bin/xtensa-esp32s3-elf-g++)
+set(CMAKE_C_COMPILER /home/wrj/.espressif/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/xtensa-esp32s3-elf-gcc)
+set(CMAKE_CXX_COMPILER /home/wrj/.espressif/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/xtensa-esp32s3-elf-g++)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FLAGS} ${IDF_INCLUDES}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-rtti ${FLAGS} ${IDF_INCLUDES}")
@@ -39,7 +39,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-rtti ${FLAGS} ${IDF
 add_compile_definitions(ESP_PLATFORM LWIP_IPV4 LWIP_IPV6 PLATFORM_NAME_FREERTOS)
 
 include_directories(
-        "/root/maturo_project/leap_low_v1/build/config"
+        "/home/wrj/leap_ros_mcu_driver-main/build/config"
         ${idf_path}/components/soc/${idf_target}/include
     )
 

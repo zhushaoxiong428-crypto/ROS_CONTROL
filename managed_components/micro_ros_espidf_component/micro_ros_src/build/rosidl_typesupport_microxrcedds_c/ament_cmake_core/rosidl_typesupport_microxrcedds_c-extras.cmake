@@ -22,7 +22,7 @@ normalize_path(rosidl_typesupport_microxrcedds_c_BIN
 
 set(rosidl_typesupport_microxrcedds_c_GENERATOR_FILES
   "${rosidl_typesupport_microxrcedds_c_DIR}
-  /../../../lib/python3.13/site-packages/rosidl_typesupport_microxrcedds_c/__init__.py")
+  /../../../lib/python3.10/site-packages/rosidl_typesupport_microxrcedds_c/__init__.py")
 normalize_path(rosidl_typesupport_microxrcedds_c_GENERATOR_FILES
   "${rosidl_typesupport_microxrcedds_c_GENERATOR_FILES}")
 

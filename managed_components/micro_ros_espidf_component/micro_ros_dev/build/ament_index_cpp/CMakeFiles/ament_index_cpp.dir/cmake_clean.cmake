@@ -1,5 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/ament_index_cpp.dir/link.d"
   "CMakeFiles/ament_index_cpp.dir/src/get_package_prefix.cpp.o"
   "CMakeFiles/ament_index_cpp.dir/src/get_package_prefix.cpp.o.d"
   "CMakeFiles/ament_index_cpp.dir/src/get_package_share_directory.cpp.o"

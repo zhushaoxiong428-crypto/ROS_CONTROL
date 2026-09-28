@@ -1,4 +1,4 @@
-#!/root/.espressif/python_env/idf5.5_py3.13_env/bin/python
+#!/home/wrj/.espressif/python_env/idf5.5_py3.10_env/bin/python3
 # EASY-INSTALL-ENTRY-SCRIPT: 'ament-pyflakes==0.12.15','console_scripts','ament_pyflakes'
 import re
 import sys

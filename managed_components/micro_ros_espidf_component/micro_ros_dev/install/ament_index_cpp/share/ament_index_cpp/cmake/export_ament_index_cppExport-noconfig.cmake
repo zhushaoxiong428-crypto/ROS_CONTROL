@@ -12,8 +12,8 @@ set_target_properties(ament_index_cpp::ament_index_cpp PROPERTIES
   IMPORTED_SONAME_NOCONFIG "libament_index_cpp.so"
   )
 
-list(APPEND _cmake_import_check_targets ament_index_cpp::ament_index_cpp )
-list(APPEND _cmake_import_check_files_for_ament_index_cpp::ament_index_cpp "${_IMPORT_PREFIX}/lib/libament_index_cpp.so" )
+list(APPEND _IMPORT_CHECK_TARGETS ament_index_cpp::ament_index_cpp )
+list(APPEND _IMPORT_CHECK_FILES_FOR_ament_index_cpp::ament_index_cpp "${_IMPORT_PREFIX}/lib/libament_index_cpp.so" )
 
 # Commands beyond this point should not need to know the version.
 set(CMAKE_IMPORT_FILE_VERSION)

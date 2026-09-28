@@ -12,8 +12,8 @@ set_target_properties(composition_interfaces::composition_interfaces__rosidl_gen
   IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib/libcomposition_interfaces__rosidl_generator_c.a"
   )
 
-list(APPEND _cmake_import_check_targets composition_interfaces::composition_interfaces__rosidl_generator_c )
-list(APPEND _cmake_import_check_files_for_composition_interfaces::composition_interfaces__rosidl_generator_c "${_IMPORT_PREFIX}/lib/libcomposition_interfaces__rosidl_generator_c.a" )
+list(APPEND _IMPORT_CHECK_TARGETS composition_interfaces::composition_interfaces__rosidl_generator_c )
+list(APPEND _IMPORT_CHECK_FILES_FOR_composition_interfaces::composition_interfaces__rosidl_generator_c "${_IMPORT_PREFIX}/lib/libcomposition_interfaces__rosidl_generator_c.a" )
 
 # Commands beyond this point should not need to know the version.
 set(CMAKE_IMPORT_FILE_VERSION)

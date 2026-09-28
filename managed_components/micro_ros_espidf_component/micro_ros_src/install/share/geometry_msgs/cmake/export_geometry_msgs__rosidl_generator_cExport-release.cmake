@@ -12,8 +12,8 @@ set_target_properties(geometry_msgs::geometry_msgs__rosidl_generator_c PROPERTIE
   IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib/libgeometry_msgs__rosidl_generator_c.a"
   )
 
-list(APPEND _cmake_import_check_targets geometry_msgs::geometry_msgs__rosidl_generator_c )
-list(APPEND _cmake_import_check_files_for_geometry_msgs::geometry_msgs__rosidl_generator_c "${_IMPORT_PREFIX}/lib/libgeometry_msgs__rosidl_generator_c.a" )
+list(APPEND _IMPORT_CHECK_TARGETS geometry_msgs::geometry_msgs__rosidl_generator_c )
+list(APPEND _IMPORT_CHECK_FILES_FOR_geometry_msgs::geometry_msgs__rosidl_generator_c "${_IMPORT_PREFIX}/lib/libgeometry_msgs__rosidl_generator_c.a" )
 
 # Commands beyond this point should not need to know the version.
 set(CMAKE_IMPORT_FILE_VERSION)

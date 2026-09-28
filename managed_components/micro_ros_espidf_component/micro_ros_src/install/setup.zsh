@@ -19,7 +19,7 @@ _colcon_prefix_chain_zsh_source_script() {
 
 # source chained prefixes
 # setting COLCON_CURRENT_PREFIX avoids determining the prefix in the sourced script
-COLCON_CURRENT_PREFIX="/root/maturo_project/leap_low_v1/managed_components/micro_ros_espidf_component/micro_ros_dev/install"
+COLCON_CURRENT_PREFIX="/home/wrj/leap_ros_mcu_driver-main/managed_components/micro_ros_espidf_component/micro_ros_dev/install"
 _colcon_prefix_chain_zsh_source_script "$COLCON_CURRENT_PREFIX/local_setup.zsh"
 
 # source this prefix

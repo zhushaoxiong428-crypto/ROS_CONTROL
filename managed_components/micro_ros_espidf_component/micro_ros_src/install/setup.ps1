@@ -23,7 +23,7 @@ function _colcon_prefix_chain_powershell_source_script {
 }
 
 # source chained prefixes
-_colcon_prefix_chain_powershell_source_script "/root/maturo_project/leap_low_v1/managed_components/micro_ros_espidf_component/micro_ros_dev/install/local_setup.ps1"
+_colcon_prefix_chain_powershell_source_script "/home/wrj/leap_ros_mcu_driver-main/managed_components/micro_ros_espidf_component/micro_ros_dev/install/local_setup.ps1"
 
 # source this prefix
 $env:COLCON_CURRENT_PREFIX=(Split-Path $PSCommandPath -Parent)

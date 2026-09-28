@@ -12,8 +12,8 @@ set_target_properties(rcutils::rcutils PROPERTIES
   IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib/librcutils.a"
   )
 
-list(APPEND _cmake_import_check_targets rcutils::rcutils )
-list(APPEND _cmake_import_check_files_for_rcutils::rcutils "${_IMPORT_PREFIX}/lib/librcutils.a" )
+list(APPEND _IMPORT_CHECK_TARGETS rcutils::rcutils )
+list(APPEND _IMPORT_CHECK_FILES_FOR_rcutils::rcutils "${_IMPORT_PREFIX}/lib/librcutils.a" )
 
 # Commands beyond this point should not need to know the version.
 set(CMAKE_IMPORT_FILE_VERSION)

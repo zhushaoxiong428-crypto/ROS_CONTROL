@@ -12,8 +12,8 @@ set_target_properties(rmw::rmw PROPERTIES
   IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib/librmw.a"
   )
 
-list(APPEND _cmake_import_check_targets rmw::rmw )
-list(APPEND _cmake_import_check_files_for_rmw::rmw "${_IMPORT_PREFIX}/lib/librmw.a" )
+list(APPEND _IMPORT_CHECK_TARGETS rmw::rmw )
+list(APPEND _IMPORT_CHECK_FILES_FOR_rmw::rmw "${_IMPORT_PREFIX}/lib/librmw.a" )
 
 # Commands beyond this point should not need to know the version.
 set(CMAKE_IMPORT_FILE_VERSION)

@@ -12,7 +12,7 @@ if ($env:COLCON_PYTHON_EXECUTABLE) {
   $_colcon_python_executable="$env:COLCON_PYTHON_EXECUTABLE"
 } else {
   # use the Python executable known at configure time
-  $_colcon_python_executable="/root/.espressif/python_env/idf5.5_py3.13_env/bin/python"
+  $_colcon_python_executable="/home/wrj/.espressif/python_env/idf5.5_py3.10_env/bin/python3"
   # if it doesn't exist try a fall back
   if (!(Test-Path "$_colcon_python_executable" -PathType Leaf)) {
     if (!(Get-Command "python3" -ErrorAction SilentlyContinue)) {

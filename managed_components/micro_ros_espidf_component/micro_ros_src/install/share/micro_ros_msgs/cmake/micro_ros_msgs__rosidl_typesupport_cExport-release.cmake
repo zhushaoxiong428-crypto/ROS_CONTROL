@@ -12,8 +12,8 @@ set_target_properties(micro_ros_msgs::micro_ros_msgs__rosidl_typesupport_c PROPE
   IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib/libmicro_ros_msgs__rosidl_typesupport_c.a"
   )
 
-list(APPEND _cmake_import_check_targets micro_ros_msgs::micro_ros_msgs__rosidl_typesupport_c )
-list(APPEND _cmake_import_check_files_for_micro_ros_msgs::micro_ros_msgs__rosidl_typesupport_c "${_IMPORT_PREFIX}/lib/libmicro_ros_msgs__rosidl_typesupport_c.a" )
+list(APPEND _IMPORT_CHECK_TARGETS micro_ros_msgs::micro_ros_msgs__rosidl_typesupport_c )
+list(APPEND _IMPORT_CHECK_FILES_FOR_micro_ros_msgs::micro_ros_msgs__rosidl_typesupport_c "${_IMPORT_PREFIX}/lib/libmicro_ros_msgs__rosidl_typesupport_c.a" )
 
 # Commands beyond this point should not need to know the version.
 set(CMAKE_IMPORT_FILE_VERSION)

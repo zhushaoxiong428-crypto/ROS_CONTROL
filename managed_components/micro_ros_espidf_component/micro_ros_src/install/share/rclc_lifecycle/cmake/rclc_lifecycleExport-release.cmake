@@ -12,8 +12,8 @@ set_target_properties(rclc_lifecycle::rclc_lifecycle PROPERTIES
   IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib/librclc_lifecycle.a"
   )
 
-list(APPEND _cmake_import_check_targets rclc_lifecycle::rclc_lifecycle )
-list(APPEND _cmake_import_check_files_for_rclc_lifecycle::rclc_lifecycle "${_IMPORT_PREFIX}/lib/librclc_lifecycle.a" )
+list(APPEND _IMPORT_CHECK_TARGETS rclc_lifecycle::rclc_lifecycle )
+list(APPEND _IMPORT_CHECK_FILES_FOR_rclc_lifecycle::rclc_lifecycle "${_IMPORT_PREFIX}/lib/librclc_lifecycle.a" )
 
 # Commands beyond this point should not need to know the version.
 set(CMAKE_IMPORT_FILE_VERSION)

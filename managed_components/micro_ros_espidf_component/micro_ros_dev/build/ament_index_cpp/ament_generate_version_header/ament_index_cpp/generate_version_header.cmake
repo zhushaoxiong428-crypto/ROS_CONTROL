@@ -15,8 +15,8 @@
 # Generated from generate_version_header.cmake.in
 # This file is used by ament_generate_version_header()
 
-set(GENERATED_HEADER_FILE "/root/maturo_project/leap_low_v1/managed_components/micro_ros_espidf_component/micro_ros_dev/build/ament_index_cpp/ament_generate_version_header/ament_index_cpp/ament_index_cpp/version.h")
-set(VERSION_TEMPLATE_FILE "/root/maturo_project/leap_low_v1/managed_components/micro_ros_espidf_component/micro_ros_dev/install/ament_cmake_gen_version_h/share/ament_cmake_gen_version_h/cmake/version.h.in")
+set(GENERATED_HEADER_FILE "/home/wrj/leap_ros_mcu_driver-main/managed_components/micro_ros_espidf_component/micro_ros_dev/build/ament_index_cpp/ament_generate_version_header/ament_index_cpp/ament_index_cpp/version.h")
+set(VERSION_TEMPLATE_FILE "/home/wrj/leap_ros_mcu_driver-main/managed_components/micro_ros_espidf_component/micro_ros_dev/install/ament_cmake_gen_version_h/share/ament_cmake_gen_version_h/cmake/version.h.in")
 
 set(VERSION_MAJOR "1")
 set(VERSION_MINOR "4")

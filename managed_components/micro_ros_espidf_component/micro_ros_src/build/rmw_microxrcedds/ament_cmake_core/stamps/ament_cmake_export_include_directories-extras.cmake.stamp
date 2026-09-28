@@ -1,6 +1,6 @@
 # generated from ament_cmake_export_include_directories/cmake/ament_cmake_export_include_directories-extras.cmake.in
 
-set(_exported_include_dirs "/root/maturo_project/leap_low_v1/managed_components/micro_ros_espidf_component/micro_ros_src/install/include")
+set(_exported_include_dirs "/home/wrj/leap_ros_mcu_driver-main/managed_components/micro_ros_espidf_component/micro_ros_src/install/include")
 
 # append include directories to rmw_microxrcedds_INCLUDE_DIRS
 # warn about not existing paths

@@ -12,8 +12,8 @@ set_target_properties(rcl::rcl PROPERTIES
   IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib/librcl.a"
   )
 
-list(APPEND _cmake_import_check_targets rcl::rcl )
-list(APPEND _cmake_import_check_files_for_rcl::rcl "${_IMPORT_PREFIX}/lib/librcl.a" )
+list(APPEND _IMPORT_CHECK_TARGETS rcl::rcl )
+list(APPEND _IMPORT_CHECK_FILES_FOR_rcl::rcl "${_IMPORT_PREFIX}/lib/librcl.a" )
 
 # Commands beyond this point should not need to know the version.
 set(CMAKE_IMPORT_FILE_VERSION)

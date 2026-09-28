@@ -12,8 +12,8 @@ set_target_properties(lifecycle_msgs::lifecycle_msgs__rosidl_typesupport_introsp
   IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib/liblifecycle_msgs__rosidl_typesupport_introspection_c.a"
   )
 
-list(APPEND _cmake_import_check_targets lifecycle_msgs::lifecycle_msgs__rosidl_typesupport_introspection_c )
-list(APPEND _cmake_import_check_files_for_lifecycle_msgs::lifecycle_msgs__rosidl_typesupport_introspection_c "${_IMPORT_PREFIX}/lib/liblifecycle_msgs__rosidl_typesupport_introspection_c.a" )
+list(APPEND _IMPORT_CHECK_TARGETS lifecycle_msgs::lifecycle_msgs__rosidl_typesupport_introspection_c )
+list(APPEND _IMPORT_CHECK_FILES_FOR_lifecycle_msgs::lifecycle_msgs__rosidl_typesupport_introspection_c "${_IMPORT_PREFIX}/lib/liblifecycle_msgs__rosidl_typesupport_introspection_c.a" )
 
 # Commands beyond this point should not need to know the version.
 set(CMAKE_IMPORT_FILE_VERSION)

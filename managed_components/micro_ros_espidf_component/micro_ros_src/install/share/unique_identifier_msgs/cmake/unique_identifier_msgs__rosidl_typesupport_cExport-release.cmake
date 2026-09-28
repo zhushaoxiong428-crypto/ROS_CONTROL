@@ -12,8 +12,8 @@ set_target_properties(unique_identifier_msgs::unique_identifier_msgs__rosidl_typ
   IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib/libunique_identifier_msgs__rosidl_typesupport_c.a"
   )
 
-list(APPEND _cmake_import_check_targets unique_identifier_msgs::unique_identifier_msgs__rosidl_typesupport_c )
-list(APPEND _cmake_import_check_files_for_unique_identifier_msgs::unique_identifier_msgs__rosidl_typesupport_c "${_IMPORT_PREFIX}/lib/libunique_identifier_msgs__rosidl_typesupport_c.a" )
+list(APPEND _IMPORT_CHECK_TARGETS unique_identifier_msgs::unique_identifier_msgs__rosidl_typesupport_c )
+list(APPEND _IMPORT_CHECK_FILES_FOR_unique_identifier_msgs::unique_identifier_msgs__rosidl_typesupport_c "${_IMPORT_PREFIX}/lib/libunique_identifier_msgs__rosidl_typesupport_c.a" )
 
 # Commands beyond this point should not need to know the version.
 set(CMAKE_IMPORT_FILE_VERSION)

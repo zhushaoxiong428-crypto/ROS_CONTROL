@@ -12,8 +12,8 @@ set_target_properties(example_interfaces::example_interfaces__rosidl_typesupport
   IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib/libexample_interfaces__rosidl_typesupport_c.a"
   )
 
-list(APPEND _cmake_import_check_targets example_interfaces::example_interfaces__rosidl_typesupport_c )
-list(APPEND _cmake_import_check_files_for_example_interfaces::example_interfaces__rosidl_typesupport_c "${_IMPORT_PREFIX}/lib/libexample_interfaces__rosidl_typesupport_c.a" )
+list(APPEND _IMPORT_CHECK_TARGETS example_interfaces::example_interfaces__rosidl_typesupport_c )
+list(APPEND _IMPORT_CHECK_FILES_FOR_example_interfaces::example_interfaces__rosidl_typesupport_c "${_IMPORT_PREFIX}/lib/libexample_interfaces__rosidl_typesupport_c.a" )
 
 # Commands beyond this point should not need to know the version.
 set(CMAKE_IMPORT_FILE_VERSION)

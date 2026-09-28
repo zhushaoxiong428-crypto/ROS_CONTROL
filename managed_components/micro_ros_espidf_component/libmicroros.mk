@@ -70,9 +70,9 @@ $(EXTENSIONS_DIR)/micro_ros_src/src:
 	git clone -b humble https://gitlab.com/ros-tracing/ros2_tracing src/ros2_tracing; \
 	git clone -b humble https://github.com/micro-ROS/micro_ros_utilities src/micro_ros_utilities; \
     touch src/rosidl/rosidl_typesupport_introspection_cpp/COLCON_IGNORE; \
-    touch src/rcl_logging/rcl_logging_log4cxx/COLCON_IGNORE; \
+    test ! -d src/rcl_logging/rcl_logging_log4cxx || touch src/rcl_logging/rcl_logging_log4cxx/COLCON_IGNORE; \
     touch src/rcl_logging/rcl_logging_spdlog/COLCON_IGNORE; \
-    touch src/rclc/rclc_examples/COLCON_IGNORE; \
+    test ! -d src/rclc/rclc_examples || touch src/rclc/rclc_examples/COLCON_IGNORE; \
 	touch src/rcl/rcl_yaml_param_parser/COLCON_IGNORE; \
 	cp -rfL $(EXTRA_ROS_PACKAGES) src/extra_packages || :; \
 	test -f src/extra_packages/extra_packages.repos && cd src/extra_packages && vcs import --input extra_packages.repos || :;
