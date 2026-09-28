@@ -8,9 +8,10 @@ static const char* TAG = "ENCODER_PCNT";
 QuadratureEncoder::QuadratureEncoder(gpio_num_t pin_a, gpio_num_t pin_b)
     : pin_a_(pin_a),
       pin_b_(pin_b),
-      pcnt_unit_(nullptr),
-      last_hw_count_(0),
-      accumulated_count_(0) {}
+      pcnt_unit_(nullptr) {}
+
+// 硬件计数上下限。到达上/下限时计数器归零，驱动把溢出量累加到软件计数中。
+static constexpr int kCountLimit = 30000;
 
 QuadratureEncoder::~QuadratureEncoder() {
   if (pcnt_unit_) {
@@ -24,8 +25,6 @@ void QuadratureEncoder::Init() {
   if (pin_a_ == GPIO_NUM_NC || pin_b_ == GPIO_NUM_NC) {
     ESP_LOGI(TAG, "Skipping PCNT init on pins %d/%d because encoder is not populated", pin_a_, pin_b_);
     pcnt_unit_ = nullptr;
-    last_hw_count_ = 0;
-    accumulated_count_ = 0;
     return;
   }
 
@@ -33,8 +32,10 @@ void QuadratureEncoder::Init() {
 
   // 1. 配置 PCNT 单元 (Unit)
   pcnt_unit_config_t unit_config = {};
-  unit_config.low_limit = -30000;   // 【修改这里】改为对称下限
-  unit_config.high_limit = 30000;   // 【修改这里】改为对称上限
+  unit_config.low_limit = -kCountLimit;
+  unit_config.high_limit = kCountLimit;
+  // 由驱动在溢出时累加计数，避免在软件里用差值猜测回绕（原实现每次溢出差 1 个脉冲）。
+  unit_config.flags.accum_count = 1;
   
   ESP_ERROR_CHECK(pcnt_new_unit(&unit_config, &pcnt_unit_));
 
@@ -69,50 +70,31 @@ void QuadratureEncoder::Init() {
   ESP_ERROR_CHECK(pcnt_channel_set_level_action(pcnt_chan_b, 
       PCNT_CHANNEL_LEVEL_ACTION_KEEP, PCNT_CHANNEL_LEVEL_ACTION_INVERSE));
 
+  // accum_count 依赖上下限观察点触发溢出中断。
+  ESP_ERROR_CHECK(pcnt_unit_add_watch_point(pcnt_unit_, kCountLimit));
+  ESP_ERROR_CHECK(pcnt_unit_add_watch_point(pcnt_unit_, -kCountLimit));
+
   // 5. 启用、清零并启动 PCNT 硬件
   ESP_ERROR_CHECK(pcnt_unit_enable(pcnt_unit_));
   ESP_ERROR_CHECK(pcnt_unit_clear_count(pcnt_unit_));
   ESP_ERROR_CHECK(pcnt_unit_start(pcnt_unit_));
 }
 
-int32_t QuadratureEncoder::GetCount() {
+int32_t QuadratureEncoder::GetCount() const {
   if (pcnt_unit_ == nullptr) {
     return 0;
   }
-
-  int hw_count = 0;
-  pcnt_unit_get_count(pcnt_unit_, &hw_count);
-
-  // 【关键修复 1】必须用 32 位整数来算差值，避免被 16位 截断
-  int32_t delta = hw_count - last_hw_count_;
-
-  // 【关键修复 2】硬件归零跃变补偿逻辑
-  // 当硬件计数器到达 30000 时，下一个脉冲会把它变成 0，跨度为 30001
-  if (delta < -15000) {
-    // 如果算出来的差值是个极大的负数（比如从 29990 突然变成 10），说明发生了正向溢出归零
-    delta += 30001; 
-  } else if (delta > 15000) {
-    // 如果算出来的差值是个极大的正数（比如从 -29990 突然变成 -10），说明发生了反向溢出归零
-    delta -= 30001; 
-  }
-
-  // 累加真实的物理脉冲增量
-  accumulated_count_ += delta;
-  last_hw_count_ = hw_count;
-
-  return accumulated_count_;
+  int count = 0;
+  pcnt_unit_get_count(pcnt_unit_, &count);
+  return count;
 }
 
 void QuadratureEncoder::ResetCount() {
   if (pcnt_unit_ == nullptr) {
-    last_hw_count_ = 0;
-    accumulated_count_ = 0;
     return;
   }
-
+  // 同时清零硬件计数和驱动内的累加值。
   pcnt_unit_clear_count(pcnt_unit_);
-  last_hw_count_ = 0;
-  accumulated_count_ = 0;
 }
 
 bool QuadratureEncoder::IsInitialized() const {

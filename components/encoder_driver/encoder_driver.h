@@ -14,8 +14,9 @@ class QuadratureEncoder {
 
   void Init();
   
-  // 获取当前累计的绝对脉冲数 (32位无溢出)
-  int32_t GetCount();
+  // 获取当前累计的绝对脉冲数。硬件计数器在 ±kCountLimit 处溢出，
+  // 由 PCNT 驱动在溢出中断里累加（accum_count），这里读到的是连续值。
+  int32_t GetCount() const;
   
   // 重置脉冲计数
   void ResetCount();
@@ -27,10 +28,6 @@ class QuadratureEncoder {
   gpio_num_t pin_b_;
 
   pcnt_unit_handle_t pcnt_unit_;
-
-  // 用于将硬件 16 位计数平滑扩展为 32 位计数的变量
-  int16_t last_hw_count_;
-  int32_t accumulated_count_;
 };
 
 #endif  // ENCODER_DRIVER_H_
