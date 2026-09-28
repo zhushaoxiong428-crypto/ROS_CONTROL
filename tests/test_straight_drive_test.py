@@ -55,6 +55,8 @@ class AnalyzeTest(unittest.TestCase):
         self.assertTrue(report.diagnosis.startswith("straight"))
         self.assertIn("scale mismatch", report.diagnosis)
         self.assertIn("right turn", report.diagnosis)
+        # 编码器多报 20 deg 右转：左轮编码器行程更长，右轮每脉冲实际走得更远。
+        self.assertGreater(report.implied_travel_ratio, 1.03)
 
     def test_right_drift_and_mixed(self):
         report = analyze(arc(-1.0, 0.4))

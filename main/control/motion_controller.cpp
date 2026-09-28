@@ -15,6 +15,15 @@ static constexpr bool kHeadingHoldEnabled = false;
 // 避免在起步斜坡的低速段把某一侧目标推到反方向。
 static constexpr float kHeadingMaxTrimRatio = 0.3f;
 
+// 左右轮"每个编码器脉冲对应的实际行程"之比（右/左），用于修正两侧减速比或
+// 轮径的差异。按均值不变拆成两侧系数，只修正左右差，不改变整体距离标定。
+// 标定方法见 doc/heading_hold.md。
+static constexpr float kRightLeftTravelRatio =
+    static_cast<float>(CONFIG_LEAP_RIGHT_LEFT_TRAVEL_RATIO_X10000) / 10000.0f;
+static constexpr float kWheelTravelScale[2] = {
+    2.0f / (1.0f + kRightLeftTravelRatio),
+    2.0f * kRightLeftTravelRatio / (1.0f + kRightLeftTravelRatio)};
+
 static const float kWheelDiameter = 65.0f;
 static const float kTrackWidth = 131.7f;
 static const float kLy = kTrackWidth / 2.0f;
@@ -319,7 +328,7 @@ void MotionController::Update(float dt, float current_imu_yaw_rad)
     int32_t current_count = encs_[i]->GetCount() * sign[i];
     float pps = (current_count - last_count_[i]) / dt;
     last_count_[i] = current_count;
-    float raw_rpm = (pps / kPulsesPerRev) * 60.0f;
+    float raw_rpm = (pps / kPulsesPerRev) * 60.0f * kWheelTravelScale[i];
     filtered_rpm_[i] = kAlpha * raw_rpm + (1.0f - kAlpha) * filtered_rpm_[i];
   }
 

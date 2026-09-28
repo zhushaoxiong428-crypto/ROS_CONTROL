@@ -21,6 +21,18 @@ menu "Leap low settings"
             (wheel diameter mismatch, slip, residual speed error). Disable only
             for A/B comparison.
 
+    config LEAP_RIGHT_LEFT_TRAVEL_RATIO_X10000
+        int "Right/left wheel travel per encoder count ratio (x10000)"
+        range 9000 11000
+        default 10000
+        help
+            Ratio of the right wheel's actual travel per encoder count to the
+            left wheel's, times 10000. Compensates gear-ratio or wheel-diameter
+            differences between the two sides. 10000 means no correction.
+            Measure it with tools/straight_drive_test.py (heading hold on):
+            the tool prints the ratio implied by the encoder/IMU heading
+            disagreement over a straight run.
+
     config MICRO_ROS_LOCAL_PORT
         string "micro-ROS local UDP port"
         default "8888"

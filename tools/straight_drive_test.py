@@ -22,6 +22,7 @@ from datetime import datetime
 from pathlib import Path
 
 STRAIGHT_TOLERANCE_DEG = 2.0
+TRACK_WIDTH_M = 0.1317  # 与固件 kTrackWidth 一致
 
 
 @dataclass
@@ -40,6 +41,8 @@ class DriftReport:
     lateral_offset_m: float
     encoder_yaw_deg: float
     imu_yaw_deg: float
+    # 让编码器航向与 IMU 航向一致所需的右/左行程比（乘以当前固件的比值即为新的标定值）
+    implied_travel_ratio: float | None
     diagnosis: str
 
 
@@ -66,6 +69,14 @@ def analyze(samples: list[Sample]) -> DriftReport:
 
     encoder_yaw = math.degrees(wrap(last.odom_yaw - first.odom_yaw))
     imu_yaw = math.degrees(wrap(last.imu_yaw - first.imu_yaw))
+
+    # 编码器推算的左右行程差 = (编码器航向 - 真实航向) × 轮距；
+    # 真实左右行程应满足 IMU 航向，由此求出右/左每脉冲行程之比。
+    implied_ratio = None
+    if forward > 0.2:
+        excess = math.radians(-(encoder_yaw - imu_yaw)) * TRACK_WIDTH_M  # 左 - 右
+        left, right = forward + excess / 2.0, forward - excess / 2.0
+        implied_ratio = left / right
 
     if abs(imu_yaw) < STRAIGHT_TOLERANCE_DEG:
         diagnosis = "straight: IMU heading change within tolerance"
@@ -96,6 +107,7 @@ def analyze(samples: list[Sample]) -> DriftReport:
         lateral_offset_m=lateral,
         encoder_yaw_deg=encoder_yaw,
         imu_yaw_deg=imu_yaw,
+        implied_travel_ratio=implied_ratio,
         diagnosis=diagnosis,
     )
 
@@ -107,6 +119,9 @@ def format_report(report: DriftReport) -> str:
         f"lateral (odom)  : {report.lateral_offset_m * 100:+.1f} cm  (+ = left)",
         f"encoder yaw     : {report.encoder_yaw_deg:+.2f} deg  (+ = left)",
         f"IMU yaw         : {report.imu_yaw_deg:+.2f} deg  (+ = left)",
+        "right/left ratio: " + (f"{report.implied_travel_ratio:.4f}  (x current "
+                                "LEAP_RIGHT_LEFT_TRAVEL_RATIO = new calibration)"
+                                if report.implied_travel_ratio is not None else "n/a"),
         f"diagnosis       : {report.diagnosis}",
     ))
 
