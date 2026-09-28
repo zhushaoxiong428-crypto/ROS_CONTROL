@@ -11,6 +11,16 @@ menu "Leap low settings"
         string "Fallback Wi-Fi password when no credentials are saved"
         default "maturo2026"
 
+    config LEAP_HEADING_HOLD
+        bool "Hold IMU heading while driving straight"
+        default y
+        help
+            When a straight velocity command (angular.z == 0) starts, latch the
+            IMU heading and trim the left/right wheel targets with a PI loop to
+            keep it. Corrects drift that encoder-only wheel sync cannot see
+            (wheel diameter mismatch, slip, residual speed error). Disable only
+            for A/B comparison.
+
     config MICRO_ROS_LOCAL_PORT
         string "micro-ROS local UDP port"
         default "8888"

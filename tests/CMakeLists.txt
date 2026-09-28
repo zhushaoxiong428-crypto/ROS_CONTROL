@@ -53,6 +53,16 @@ target_compile_features(emergency_stop_gate_test PRIVATE cxx_std_17)
 target_compile_options(emergency_stop_gate_test PRIVATE -Wall -Wextra -Werror)
 add_test(NAME emergency_stop_gate_test COMMAND emergency_stop_gate_test)
 
+add_executable(
+    heading_hold_test
+    heading_hold_test.cpp
+    ../main/control/heading_hold.cpp
+)
+target_include_directories(heading_hold_test PRIVATE ../main/control)
+target_compile_features(heading_hold_test PRIVATE cxx_std_17)
+target_compile_options(heading_hold_test PRIVATE -Wall -Wextra -Werror)
+add_test(NAME heading_hold_test COMMAND heading_hold_test)
+
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 add_test(
     NAME analyze_motor_startup_test
@@ -65,4 +75,8 @@ add_test(
 add_test(
     NAME analyze_motor_timing_test
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_analyze_motor_timing.py
+)
+add_test(
+    NAME straight_drive_test_analysis
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_straight_drive_test.py
 )

@@ -4,6 +4,17 @@
 #include <algorithm>
 #include <cmath>
 
+#include "sdkconfig.h"
+
+#if defined(CONFIG_LEAP_HEADING_HOLD)
+static constexpr bool kHeadingHoldEnabled = true;
+#else
+static constexpr bool kHeadingHoldEnabled = false;
+#endif
+// 航向修正在左右轮上产生的目标转速差，不超过当前平均目标转速的该比例，
+// 避免在起步斜坡的低速段把某一侧目标推到反方向。
+static constexpr float kHeadingMaxTrimRatio = 0.3f;
+
 static const float kWheelDiameter = 65.0f;
 static const float kTrackWidth = 131.7f;
 static const float kLy = kTrackWidth / 2.0f;
@@ -161,6 +172,7 @@ void MotionController::ResetOdometry()
     target_vel_[i] = 0.0f;
   }
   wheel_pair_controller_.Reset();
+  heading_hold_.Reset();
   last_sync_error_rpm_ = 0.0f;
   last_sync_correction_pwm_ = 0.0f;
   wheel_sync_active_ = false;
@@ -447,6 +459,7 @@ void MotionController::Update(float dt, float current_imu_yaw_rad)
       motors_[i]->Brake();
     }
     wheel_pair_controller_.Reset();
+    heading_hold_.Reset();
     last_sync_error_rpm_ = 0.0f;
     last_sync_correction_pwm_ = 0.0f;
     wheel_sync_active_ = false;
@@ -488,6 +501,24 @@ void MotionController::Update(float dt, float current_imu_yaw_rad)
     }
   }
 
+  // 直行航向保持：把 IMU 航向误差换算成左右轮等大反向的目标转速修正。
+  // 最终目标 final_target_vel_ 不变，因此轮对控制器仍按"直行"判定资格，
+  // 同步误差则基于修正后的目标计算，两者方向一致、不会互相抵消。
+  const bool heading_hold_engaged =
+      kHeadingHoldEnabled &&
+      control_mode_ == ControlMode::kVelocity &&
+      straight_control_enabled_;
+  const float heading_wz = heading_hold_.Update(heading_hold_engaged, imu_yaw_rel_, dt);
+  float control_target[kNumWheels] = {target_vel_[0], target_vel_[1]};
+  if (heading_wz != 0.0f && target_vel_[0] * target_vel_[1] > 0.0f)
+  {
+    const float mean_abs_rpm = 0.5f * (std::abs(target_vel_[0]) + std::abs(target_vel_[1]));
+    const float trim_limit = kHeadingMaxTrimRatio * mean_abs_rpm;
+    const float trim_rpm = std::clamp(heading_wz * kLy * kMmsToRpm, -trim_limit, trim_limit);
+    control_target[0] -= trim_rpm;
+    control_target[1] += trim_rpm;
+  }
+
   // Compute both independent wheel-loop outputs before applying the paired
   // startup/synchronisation correction. This keeps the two PWM updates close
   // together and lets the pair controller add equal-and-opposite trim.
@@ -495,12 +526,12 @@ void MotionController::Update(float dt, float current_imu_yaw_rad)
   float base_pwm[kNumWheels] = {};
   for (int i = 0; i < kNumWheels; ++i)
   {
-    if (std::abs(target_vel_[i]) < 0.1f)
+    if (std::abs(control_target[i]) < 0.1f)
     {
       pid_vel_[i].Reset();
     }
-    raw_pwm[i] = pid_vel_[i].Calculate(target_vel_[i], filtered_rpm_[i], dt);
-    base_pwm[i] = CalculateBasePwm(i, target_vel_[i], raw_pwm[i]);
+    raw_pwm[i] = pid_vel_[i].Calculate(control_target[i], filtered_rpm_[i], dt);
+    base_pwm[i] = CalculateBasePwm(i, control_target[i], raw_pwm[i]);
   }
 
   const bool wheel_sync_available =
@@ -509,8 +540,8 @@ void MotionController::Update(float dt, float current_imu_yaw_rad)
       encs_[0]->IsInitialized() &&
       encs_[1]->IsInitialized();
   const WheelPairControlOutput pair_output = wheel_pair_controller_.Update(
-      target_vel_[0],
-      target_vel_[1],
+      control_target[0],
+      control_target[1],
       final_target_vel_[0],
       final_target_vel_[1],
       filtered_rpm_[0],
@@ -571,6 +602,7 @@ void MotionController::Stop()
   control_mode_ = ControlMode::kVelocity;
   straight_control_enabled_ = false;
   wheel_pair_controller_.Reset();
+  heading_hold_.Reset();
   last_sync_error_rpm_ = 0.0f;
   last_sync_correction_pwm_ = 0.0f;
   wheel_sync_active_ = false;
@@ -735,6 +767,23 @@ void MotionController::GetMotorControlState(
   if (final_pwm)
   {
     *final_pwm = last_final_pwm_[motor_index];
+  }
+}
+
+void MotionController::GetHeadingHoldState(
+    bool *active, float *error_rad, float *correction_wz) const
+{
+  if (active)
+  {
+    *active = heading_hold_.Active();
+  }
+  if (error_rad)
+  {
+    *error_rad = heading_hold_.LastErrorRad();
+  }
+  if (correction_wz)
+  {
+    *correction_wz = heading_hold_.LastCorrection();
   }
 }
 

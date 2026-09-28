@@ -5,6 +5,7 @@
 #include "encoder_driver.h"
 #include "pid_controller.h"
 #include "wheel_pair_controller.h"
+#include "heading_hold.h"
 
 enum class ControlMode
 {
@@ -60,6 +61,8 @@ public:
       float *actual_rpm,
       float *raw_pwm,
       float *final_pwm) const;
+  // 直行航向保持状态：是否生效、航向误差 (rad)、角速度修正量 (rad/s)。
+  void GetHeadingHoldState(bool *active, float *error_rad, float *correction_wz) const;
   void GetWheelSyncState(
       float *sync_error_rpm,
       float *sync_correction_pwm,
@@ -84,6 +87,7 @@ private:
   QuadratureEncoder *encs_[kNumWheels];
   PidController pid_vel_[kNumWheels];
   WheelPairController wheel_pair_controller_;
+  HeadingHold heading_hold_;
 
   float target_vel_[kNumWheels] = {0};
   float final_target_vel_[kNumWheels] = {0};

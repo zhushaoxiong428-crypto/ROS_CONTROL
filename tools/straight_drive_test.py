@@ -1,0 +1,205 @@
+#!/usr/bin/env python3
+"""落地直行偏航测试：发送直行 /cmd_vel，同时记录 /odom 与 /imu，判断偏航来源。
+
+/odom 的航向由编码器推算，/imu 的航向由陀螺仪积分得到：
+- 两者偏航接近：左右轮转速确实不同（控制问题），编码器看得到；
+- IMU 偏航明显而编码器几乎为 0：两轮转速一样但车仍然转了，
+  来自轮径差、打滑等机械因素，只有 IMU 航向闭环能纠正。
+
+用法（车放在地上，前方留出足够空间，随时准备急停）：
+    python3 tools/straight_drive_test.py --speed 0.1 --distance 1.0 --confirm-ground
+结果 CSV 写入 data/，文件名带时间戳。
+"""
+
+from __future__ import annotations
+
+import argparse
+import csv
+import math
+import time
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+
+STRAIGHT_TOLERANCE_DEG = 2.0
+
+
+@dataclass
+class Sample:
+    t: float
+    odom_x: float
+    odom_y: float
+    odom_yaw: float
+    imu_yaw: float
+
+
+@dataclass
+class DriftReport:
+    duration_s: float
+    distance_m: float
+    lateral_offset_m: float
+    encoder_yaw_deg: float
+    imu_yaw_deg: float
+    diagnosis: str
+
+
+def wrap(angle: float) -> float:
+    return math.remainder(angle, 2.0 * math.pi)
+
+
+def yaw_from_quaternion(w: float, x: float, y: float, z: float) -> float:
+    return math.atan2(2.0 * (w * z + x * y), 1.0 - 2.0 * (y * y + z * z))
+
+
+def analyze(samples: list[Sample]) -> DriftReport:
+    """samples 为直行段内（含起步）按时间排序的采样。偏航以逆时针（向左）为正。"""
+    if len(samples) < 2:
+        raise ValueError("need at least two samples inside the drive window")
+    first, last = samples[0], samples[-1]
+
+    dx = last.odom_x - first.odom_x
+    dy = last.odom_y - first.odom_y
+    # 转到起点航向坐标系：前进方向为 x，左侧为 y。
+    cos0, sin0 = math.cos(first.odom_yaw), math.sin(first.odom_yaw)
+    forward = cos0 * dx + sin0 * dy
+    lateral = -sin0 * dx + cos0 * dy
+
+    encoder_yaw = math.degrees(wrap(last.odom_yaw - first.odom_yaw))
+    imu_yaw = math.degrees(wrap(last.imu_yaw - first.imu_yaw))
+
+    if abs(imu_yaw) < STRAIGHT_TOLERANCE_DEG:
+        diagnosis = "straight: IMU heading change within tolerance"
+    else:
+        side = "left" if imu_yaw > 0 else "right"
+        ratio = encoder_yaw / imu_yaw
+        if ratio >= 0.7:
+            diagnosis = (f"drifts {side}; encoders see most of it "
+                         f"({ratio:.0%}): wheel speeds really differ (control)")
+        elif abs(encoder_yaw) < STRAIGHT_TOLERANCE_DEG:
+            diagnosis = (f"drifts {side}; encoders see almost none of it: "
+                         "wheel diameter mismatch or slip (mechanical)")
+        else:
+            diagnosis = (f"drifts {side}; encoders see {ratio:.0%} of it: "
+                         "mixed control and mechanical causes")
+
+    return DriftReport(
+        duration_s=last.t - first.t,
+        distance_m=forward,  # /odom 位置单位为 m
+        lateral_offset_m=lateral,
+        encoder_yaw_deg=encoder_yaw,
+        imu_yaw_deg=imu_yaw,
+        diagnosis=diagnosis,
+    )
+
+
+def format_report(report: DriftReport) -> str:
+    return "\n".join((
+        f"duration        : {report.duration_s:.2f} s",
+        f"distance (odom) : {report.distance_m:.3f} m",
+        f"lateral (odom)  : {report.lateral_offset_m * 100:+.1f} cm  (+ = left)",
+        f"encoder yaw     : {report.encoder_yaw_deg:+.2f} deg  (+ = left)",
+        f"IMU yaw         : {report.imu_yaw_deg:+.2f} deg  (+ = left)",
+        f"diagnosis       : {report.diagnosis}",
+    ))
+
+
+def run(args: argparse.Namespace) -> int:
+    import rclpy
+    from geometry_msgs.msg import Twist
+    from nav_msgs.msg import Odometry
+    from rclpy.node import Node
+    from rclpy.qos import qos_profile_sensor_data
+    from sensor_msgs.msg import Imu
+
+    class StraightDriveNode(Node):
+        def __init__(self) -> None:
+            super().__init__("straight_drive_test")
+            self.cmd = self.create_publisher(Twist, "/cmd_vel", 10)
+            self.odom = None
+            self.imu_yaw = None
+            # 遥测可能是 Best Effort，sensor_data QoS 与两种发布端都兼容。
+            self.create_subscription(Odometry, "/odom", self.on_odom, qos_profile_sensor_data)
+            self.create_subscription(Imu, "/imu", self.on_imu, qos_profile_sensor_data)
+
+        def on_odom(self, msg: Odometry) -> None:
+            q = msg.pose.pose.orientation
+            self.odom = (msg.pose.pose.position.x, msg.pose.pose.position.y,
+                         yaw_from_quaternion(q.w, q.x, q.y, q.z))
+
+        def on_imu(self, msg: Imu) -> None:
+            q = msg.orientation
+            self.imu_yaw = yaw_from_quaternion(q.w, q.x, q.y, q.z)
+
+        def send(self, vx: float) -> None:
+            twist = Twist()
+            twist.linear.x = vx
+            self.cmd.publish(twist)
+
+    rclpy.init()
+    node = StraightDriveNode()
+    period = 1.0 / args.rate
+    samples: list[Sample] = []
+
+    def spin_for(seconds: float, vx: float, record: bool, start: float) -> None:
+        end = time.monotonic() + seconds
+        while time.monotonic() < end:
+            node.send(vx)
+            rclpy.spin_once(node, timeout_sec=period)
+            if record and node.odom is not None and node.imu_yaw is not None:
+                samples.append(Sample(time.monotonic() - start, *node.odom, node.imu_yaw))
+
+    try:
+        deadline = time.monotonic() + 5.0
+        while (node.odom is None or node.imu_yaw is None) and time.monotonic() < deadline:
+            rclpy.spin_once(node, timeout_sec=0.1)
+        if node.odom is None or node.imu_yaw is None:
+            print("no /odom or /imu received; is the micro-ROS agent connected?")
+            return 2
+
+        start = time.monotonic()
+        # 连续零速命令：重新武装电池互锁 / 急停释放后的零速要求，并让车静止。
+        spin_for(0.5, 0.0, False, start)
+        drive_s = args.distance / args.speed
+        print(f"driving {args.distance:.2f} m at {args.speed:.2f} m/s ({drive_s:.1f} s)...")
+        spin_for(drive_s, args.speed, True, start)
+    finally:
+        # 无论成功与否都连续发零速，停车交给 MCU 的主动制动和 500 ms 看门狗兜底。
+        for _ in range(int(args.rate)):
+            node.send(0.0)
+            time.sleep(period)
+        node.destroy_node()
+        rclpy.shutdown()
+
+    out = Path(args.output) if args.output else Path("data") / (
+        f"straight_drive_{args.speed:.2f}mps_{datetime.now():%Y%m%d_%H%M%S}.csv")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with out.open("w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(("time_s", "odom_x", "odom_y", "odom_yaw_rad", "imu_yaw_rad"))
+        for s in samples:
+            writer.writerow((f"{s.t:.4f}", s.odom_x, s.odom_y, s.odom_yaw, s.imu_yaw))
+
+    print(format_report(analyze(samples)))
+    print(f"samples saved to {out}")
+    return 0
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--speed", type=float, default=0.1, help="forward speed, m/s")
+    parser.add_argument("--distance", type=float, default=1.0, help="drive distance, m")
+    parser.add_argument("--rate", type=float, default=20.0, help="/cmd_vel rate, Hz")
+    parser.add_argument("--output", help="CSV path (default: data/straight_drive_*.csv)")
+    parser.add_argument("--confirm-ground", action="store_true",
+                        help="required: robot is on the floor with clear space ahead")
+    args = parser.parse_args()
+    if not args.confirm_ground:
+        parser.error("this sends real motion commands; pass --confirm-ground when safe")
+    if not 0.0 < args.speed <= 0.3 or not 0.0 < args.distance <= 3.0:
+        parser.error("speed must be in (0, 0.3] m/s and distance in (0, 3] m")
+    return run(args)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
