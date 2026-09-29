@@ -20,6 +20,7 @@ set(APP_SRCS
     "tasks/network/mavlink_uart_task.cpp"
     "tasks/network/wifi_provision_task.cpp"
     "tasks/network/microros_task.cpp"
+    "tasks/diag/rt_stats_task.cpp"
     "network/wifi_app.cpp"
 )
 

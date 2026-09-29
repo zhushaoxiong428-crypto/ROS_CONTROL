@@ -11,6 +11,7 @@
 #include "control/battery_motion_interlock.h"
 #include "control/motion_command_safety.h"
 #include "control/emergency_stop_gate.h"
+#include "control/cycle_timing_stats.h"
 
 #include <cmath>
 
@@ -22,6 +23,10 @@ static constexpr float kControlDt = 0.02f;
 static constexpr TickType_t kControlPeriod = pdMS_TO_TICKS(20);
 // 持续速度命令（mode 0）超过该时间未更新则停车。
 static constexpr TickType_t kVelocityCmdTimeout = pdMS_TO_TICKS(500);
+// 实时性统计：每 500 个周期（10 s）交给 rt_stats_task 输出一次。
+static constexpr int64_t kControlPeriodUs = 20000;
+static constexpr int64_t kOverrunMarginUs = 2000;
+static constexpr uint32_t kTimingWindowCycles = 500;
 
 void motion_task(void *p)
 {
@@ -49,6 +54,9 @@ void motion_task(void *p)
     uint32_t last_reject_log_ms = 0;
     bool estop_logged_active = false;
     EmergencyStopGate estop_gate;
+    CycleTimingStats timing_stats(kControlPeriodUs, kOverrunMarginUs);
+    int64_t last_wake_us = 0;
+    int64_t last_busy_us = 0;
 
     auto reset_blocked_motion_state = [&]() {
         cmd_msg = {};
@@ -124,6 +132,22 @@ void motion_task(void *p)
 
     while (1)
     {
+        const int64_t wake_us = esp_timer_get_time();
+        if (last_wake_us != 0)
+        {
+            timing_stats.AddCycle(wake_us - last_wake_us, last_busy_us);
+            if (timing_stats.Count() >= kTimingWindowCycles)
+            {
+                const CycleTimingSnapshot snapshot = timing_stats.Snapshot();
+                if (q_control_timing != nullptr)
+                {
+                    xQueueOverwrite(q_control_timing, &snapshot);
+                }
+                timing_stats.Reset();
+            }
+        }
+        last_wake_us = wake_us;
+
         xQueuePeek(q_imu_state, &imu_msg, 0);
 
         if (q_battery_state != nullptr &&
@@ -329,6 +353,7 @@ void motion_task(void *p)
             last_logged_motion_allowed = interlock_status.motion_allowed;
         }
 
+        last_busy_us = esp_timer_get_time() - wake_us;
         vTaskDelayUntil(&last_wake_time, kControlPeriod);
     }
 }

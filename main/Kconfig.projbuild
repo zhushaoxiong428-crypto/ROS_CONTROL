@@ -33,6 +33,21 @@ menu "Leap low settings"
             the tool prints the ratio implied by the encoder/IMU heading
             disagreement over a straight run.
 
+    config LEAP_RT_STATS
+        bool "Log real-time statistics (control jitter, stack, CPU load)"
+        default y
+        select FREERTOS_GENERATE_RUN_TIME_STATS
+        help
+            A lowest-priority task periodically logs the 20 ms control loop
+            period statistics (mean/min/max/std, execution time, overruns),
+            per-task stack high-water marks and per-task / per-core CPU load.
+
+    config LEAP_RT_STATS_INTERVAL_S
+        int "Real-time statistics interval (s)"
+        depends on LEAP_RT_STATS
+        range 2 60
+        default 10
+
     config MICRO_ROS_LOCAL_PORT
         string "micro-ROS local UDP port"
         default "8888"

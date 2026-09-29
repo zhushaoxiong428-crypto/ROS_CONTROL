@@ -27,6 +27,7 @@
 #include "system_globals.h"
 #include "wifi_app.h"
 #include "msg/motor_debug_msg.h"
+#include "control/cycle_timing_stats.h"
 
 static const char *TAG = "APP_RUNTIME";
 
@@ -157,6 +158,7 @@ static void create_runtime_queues(void) {
     q_temperature_state = xQueueCreate(1, sizeof(TemperatureMsg));
     q_battery_state = xQueueCreate(1, sizeof(BatteryMsg));
     q_power_safety_state = xQueueCreate(1, sizeof(PowerSafetyMsg));
+    q_control_timing = xQueueCreate(1, sizeof(CycleTimingSnapshot));
     // 运动命令需要按到达顺序逐条处理（零速武装命令不能被下一条命令覆盖），
     // 8 条足够覆盖一个 20 ms 控制周期内的突发。
     q_motion_cmd = xQueueCreate(8, sizeof(MotionMsg));
@@ -204,6 +206,10 @@ void app_runtime_startup(void) {
     }
     xTaskCreate(camera_task, "camera_task", 4096, NULL, 3, NULL);
     xTaskCreate(wifi_start_task, "wifi_start", 4096, NULL, 3, &s_wifi_start_task_handle);
+#if defined(CONFIG_LEAP_RT_STATS)
+    // 最低应用优先级：只在其他任务空闲时打印，不干扰控制周期。
+    xTaskCreate(rt_stats_task, "rt_stats", 4096, NULL, 1, NULL);
+#endif
 
     s_runtime_started = true;
     ESP_LOGI(TAG, "Leap low runtime started");

@@ -64,6 +64,7 @@ extern QueueHandle_t q_gamepad_state;
 extern QueueHandle_t q_temperature_state;
 extern QueueHandle_t q_battery_state;
 extern QueueHandle_t q_power_safety_state;
+extern QueueHandle_t q_control_timing; // CycleTimingSnapshot，motion_task 每 10 s 覆盖写一次
 
 
 extern QueueHandle_t q_motion_cmd;
@@ -86,3 +87,4 @@ void lidar_task(void *p);
 void wifi_provision_task(void *pvParameters);
 void gamepad_i2c_task(void *p);
 void microros_task(void *p);
+void rt_stats_task(void *p);

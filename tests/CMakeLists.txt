@@ -63,6 +63,12 @@ target_compile_features(heading_hold_test PRIVATE cxx_std_17)
 target_compile_options(heading_hold_test PRIVATE -Wall -Wextra -Werror)
 add_test(NAME heading_hold_test COMMAND heading_hold_test)
 
+add_executable(cycle_timing_stats_test cycle_timing_stats_test.cpp)
+target_include_directories(cycle_timing_stats_test PRIVATE ../main/control)
+target_compile_features(cycle_timing_stats_test PRIVATE cxx_std_17)
+target_compile_options(cycle_timing_stats_test PRIVATE -Wall -Wextra -Werror)
+add_test(NAME cycle_timing_stats_test COMMAND cycle_timing_stats_test)
+
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 add_test(
     NAME analyze_motor_startup_test

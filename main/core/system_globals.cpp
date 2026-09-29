@@ -74,6 +74,7 @@ QueueHandle_t q_gamepad_state = nullptr;
 QueueHandle_t q_temperature_state = nullptr;
 QueueHandle_t q_battery_state = nullptr;
 QueueHandle_t q_power_safety_state = nullptr;
+QueueHandle_t q_control_timing = nullptr;
 
 
 QueueHandle_t q_motion_cmd = nullptr;
