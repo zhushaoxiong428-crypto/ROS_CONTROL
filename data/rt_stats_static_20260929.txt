@@ -1,0 +1,30 @@
+# 静止、micro-ROS 已连接、遥测正常发布（best_effort，/scan 320 点）。固件 40915070。
+I (113884) MICROROS: Discovering micro-ROS Agent (discovery port 8889)
+I (113994) MICROROS: Discovered micro-ROS Agent: 10.80.9.120:8888 in 117 ms
+I (114954) MICROROS: micro-ROS active: session=1 agent_mode=auto agent=10.80.9.120:8888, telemetry_qos=best_effort, scan_publish=enabled scan_points=320, health_ping=200ms_x1 every=2000ms fail_window=12000ms min_fail=3, pub=/odom,/motor_debug,/imu,/scan,/battery_state,/ultrasonic, sub=/cmd_vel, srv=/set_speed_pid,/get_speed_pid
+I (120084) MICROROS: MICROROS_TIMING window_ms=10023 session=1 timer_count=237 debug_count=237 ping_count=3 loop_max_us=1121365 spin_max_us=42687 wait_max_us=35014 cmd_max_us=0 timer_max_us=9319 svc_max_us=1541 epoch_max_us=52 ping_max_us=8332 setup_ping_max_us=512859 report_max_us=17588 loop_gt50=1 spin_gt50=0 wait_gt50=0 timer_gt50=0 svc_gt50=0 ping_gt50=0 ping_fail=0 ping_fail_streak=0 ping_fail_age_ms=0
+I (120094) MICROROS: MICROROS_TIMING_PUB n/max_us/gt50/fail odom=237/1877/0/0 imu=237/2053/0/0 debug=237/1577/0/0 scan=47/2545/0/0 battery=47/1745/0/0 ultra=47/1860/0/0
+I (120104) MICROROS: MICROROS_TIMING_SLOW stage=setup_ping count=1 gt50=1 max_us=512859 max_end_mcu_ms=114182 debug_seq=0 fail=0
+I (120104) MICROROS: MICROROS_TIMING_SLOW stage=loop count=237 gt50=1 max_us=1121365 max_end_mcu_ms=114671 debug_seq=1 fail=0
+I (123494) RT_STATS: control(20ms) n=500 period avg=20.000 min=19.574 max=20.387 std=0.066 ms |jitter|max=0.426 ms busy avg=0.502 max=1.964 ms overruns(>22ms)=0
+I (123494) RT_STATS: cpu load: core0=15.6% core1=33.8% (window 10.0 s)
+I (123494) RT_STATS: task             prio    cpu%  stack_free
+I (123494) RT_STATS: IDLE0               0  84.35%       696 B
+I (123504) RT_STATS: IDLE1               0  66.17%       688 B
+I (123504) RT_STATS: microros            4  24.03%      7424 B
+I (123504) RT_STATS: wifi               23  10.20%      3452 B
+I (123514) RT_STATS: tiT                18   6.89%      1880 B
+I (123514) RT_STATS: imu                 5   2.72%      2836 B
+I (123514) RT_STATS: motion              5   2.47%      1268 B
+I (123514) RT_STATS: lidar               4   1.99%      5396 B
+I (123524) RT_STATS: rt_stats            1   0.60%      1540 B
+I (123524) RT_STATS: battery             4   0.27%      1920 B
+I (123524) RT_STATS: peripheral          3   0.16%      1980 B
+I (123524) RT_STATS: ultrasonic          4   0.11%      3264 B
+I (123534) RT_STATS: camera_task         3   0.05%      1920 B
+I (123534) RT_STATS: esp_timer          22   0.02%      3096 B
+I (123534) RT_STATS: ipc1               24   0.00%       528 B
+I (123544) RT_STATS: httpd               5   0.00%     11096 B
+I (123544) RT_STATS: sys_evt            20   0.00%       592 B
+I (123544) RT_STATS: Tmr Svc             1   0.00%      1320 B
+I (123544) RT_STATS: ipc0               24   0.00%       536 B
