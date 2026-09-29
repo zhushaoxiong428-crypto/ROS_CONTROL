@@ -1,0 +1,25 @@
+# 车轮架空、straight_drive_test.py 以 0.1 m/s 持续发送 /cmd_vel，micro-ROS 遥测正常发布。固件 40915070。
+I (34844) MICROROS: MICROROS_TIMING window_ms=10016 session=1 timer_count=501 debug_count=501 ping_count=6 loop_max_us=39214 spin_max_us=38620 wait_max_us=31995 cmd_max_us=0 timer_max_us=10691 svc_max_us=2346 epoch_max_us=263 ping_max_us=14942 setup_ping_max_us=0 report_max_us=20012 loop_gt50=0 spin_gt50=0 wait_gt50=0 timer_gt50=0 svc_gt50=0 ping_gt50=0 ping_fail=0 ping_fail_streak=0 ping_fail_age_ms=0
+I (34854) MICROROS: MICROROS_TIMING_PUB n/max_us/gt50/fail odom=501/2304/0/0 imu=501/2489/0/0 debug=501/2129/0/0 scan=101/2391/0/0 battery=101/2391/0/0 ultra=101/1789/0/0
+I (43494) RT_STATS: control(20ms) n=500 period avg=20.000 min=18.809 max=21.190 std=0.148 ms |jitter|max=1.191 ms busy avg=0.685 max=2.157 ms overruns(>22ms)=0
+I (43494) RT_STATS: cpu load: core0=58.1% core1=8.6% (window 10.0 s)
+I (43494) RT_STATS: task             prio    cpu%  stack_free
+I (43494) RT_STATS: IDLE1               0  91.42%       624 B
+I (43504) RT_STATS: IDLE0               0  41.94%       696 B
+I (43524) RT_STATS: microros            4  36.20%      7356 B
+I (43524) RT_STATS: wifi               23   9.94%      3452 B
+I (43524) RT_STATS: tiT                18   9.71%      1896 B
+I (43524) RT_STATS: imu                 5   3.71%      2836 B
+I (43524) RT_STATS: motion              5   3.42%      1236 B
+I (43534) RT_STATS: lidar               4   2.59%      5396 B
+I (43534) RT_STATS: rt_stats            1   0.43%      1620 B
+I (43534) RT_STATS: battery             4   0.29%      1920 B
+I (43534) RT_STATS: peripheral          3   0.14%      1972 B
+I (43544) RT_STATS: ultrasonic          4   0.12%      3264 B
+I (43564) RT_STATS: camera_task         3   0.04%      1920 B
+I (43564) RT_STATS: esp_timer          22   0.02%      3096 B
+I (43564) RT_STATS: sys_evt            20   0.00%       592 B
+I (43574) RT_STATS: Tmr Svc             1   0.00%      1320 B
+I (43574) RT_STATS: ipc0               24   0.00%       536 B
+I (43574) RT_STATS: ipc1               24   0.00%       528 B
+I (43584) RT_STATS: httpd               5   0.00%     11132 B
