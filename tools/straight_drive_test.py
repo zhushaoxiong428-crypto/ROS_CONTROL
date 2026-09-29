@@ -23,6 +23,10 @@ from pathlib import Path
 
 STRAIGHT_TOLERANCE_DEG = 2.0
 TRACK_WIDTH_M = 0.1317  # 与固件 kTrackWidth 一致
+# 打滑检测：每前进 SLIP_WINDOW_M，编码器航向与 IMU 航向之差的变化超过该角度即视为打滑/卡顿。
+# 固定的比例差按行程线性累积（本车未标定时约 2.3 deg / 0.1 m），打滑是局部突变。
+SLIP_WINDOW_M = 0.1
+SLIP_THRESHOLD_DEG = 5.0
 
 
 @dataclass
@@ -43,6 +47,8 @@ class DriftReport:
     imu_yaw_deg: float
     # 让编码器航向与 IMU 航向一致所需的右/左行程比（乘以当前固件的比值即为新的标定值）
     implied_travel_ratio: float | None
+    # 检测到的打滑/卡顿事件：(起点前进距离 m, 该段编码器-IMU 航向差变化 deg)
+    slip_events: list[tuple[float, float]]
     diagnosis: str
 
 
@@ -52,6 +58,48 @@ def wrap(angle: float) -> float:
 
 def yaw_from_quaternion(w: float, x: float, y: float, z: float) -> float:
     return math.atan2(2.0 * (w * z + x * y), 1.0 - 2.0 * (y * y + z * z))
+
+
+def _forward_and_divergence(samples: list[Sample]) -> tuple[list[float], list[float]]:
+    """每个采样点的前进距离（起点航向坐标系）和累计的"编码器航向 - IMU 航向"（deg，已展开）。"""
+    first = samples[0]
+    cos0, sin0 = math.cos(first.odom_yaw), math.sin(first.odom_yaw)
+    forward, divergence = [], []
+    enc = imu = 0.0
+    for i, s in enumerate(samples):
+        if i > 0:
+            enc += wrap(s.odom_yaw - samples[i - 1].odom_yaw)
+            imu += wrap(s.imu_yaw - samples[i - 1].imu_yaw)
+        forward.append(cos0 * (s.odom_x - first.odom_x) + sin0 * (s.odom_y - first.odom_y))
+        divergence.append(math.degrees(enc - imu))
+    return forward, divergence
+
+
+def find_slip_events(samples: list[Sample]) -> list[tuple[float, float]]:
+    forward, divergence = _forward_and_divergence(samples)
+    # 1) 标出所有"前进 SLIP_WINDOW_M 内航向差变化超过阈值"的窗口 [i, j]
+    windows: list[tuple[int, int]] = []
+    j = 0
+    for i in range(len(samples)):
+        while j < len(samples) and forward[j] - forward[i] < SLIP_WINDOW_M:
+            j += 1
+        if j >= len(samples):
+            break
+        if abs(divergence[j] - divergence[i]) > SLIP_THRESHOLD_DEG:
+            windows.append((i, j))
+    # 2) 合并重叠或相邻的窗口，每段报告起点距离和整段的航向差变化
+    events: list[tuple[float, float]] = []
+    start = end = None
+    for i, j in windows:
+        if start is not None and i <= end:
+            end = max(end, j)
+            continue
+        if start is not None:
+            events.append((forward[start], divergence[end] - divergence[start]))
+        start, end = i, j
+    if start is not None:
+        events.append((forward[start], divergence[end] - divergence[start]))
+    return events
 
 
 def analyze(samples: list[Sample]) -> DriftReport:
@@ -72,16 +120,24 @@ def analyze(samples: list[Sample]) -> DriftReport:
 
     # 编码器推算的左右行程差 = (编码器航向 - 真实航向) × 轮距；
     # 真实左右行程应满足 IMU 航向，由此求出右/左每脉冲行程之比。
+    # 比例只用第一次打滑之前的数据推算，避免局部打滑污染标定结果。
+    slip_events = find_slip_events(samples)
+    ratio_samples = samples
+    if slip_events:
+        fwd_list, _ = _forward_and_divergence(samples)
+        cut = next(i for i, f in enumerate(fwd_list) if f >= slip_events[0][0])
+        ratio_samples = samples[:cut + 1]
     implied_ratio = None
-    if forward > 0.2:
-        excess = math.radians(-(encoder_yaw - imu_yaw)) * TRACK_WIDTH_M  # 左 - 右
-        left, right = forward + excess / 2.0, forward - excess / 2.0
+    r_fwd, r_div = _forward_and_divergence(ratio_samples)
+    if len(ratio_samples) >= 2 and r_fwd[-1] > 0.2:
+        excess = math.radians(-r_div[-1]) * TRACK_WIDTH_M  # 左 - 右
+        left, right = r_fwd[-1] + excess / 2.0, r_fwd[-1] - excess / 2.0
         implied_ratio = left / right
 
     if abs(imu_yaw) < STRAIGHT_TOLERANCE_DEG:
         diagnosis = "straight: IMU heading change within tolerance"
         mismatch = encoder_yaw - imu_yaw
-        if abs(mismatch) >= STRAIGHT_TOLERANCE_DEG:
+        if abs(mismatch) >= STRAIGHT_TOLERANCE_DEG and not slip_events:
             # 车实际走直，但编码器推算出转弯：两轮每个脉冲对应的行程不同。
             # 左右轮行程差 = 航向差 × 轮距，据此给出右/左比例。
             side = "right" if mismatch < 0 else "left"
@@ -101,6 +157,10 @@ def analyze(samples: list[Sample]) -> DriftReport:
             diagnosis = (f"drifts {side}; encoders see {ratio:.0%} of it: "
                          "mixed control and mechanical causes")
 
+    if slip_events:
+        diagnosis = (f"{len(slip_events)} slip/stall event(s) (see below); "
+                     "whole-run encoder yaw and odometry are unreliable. " + diagnosis)
+
     return DriftReport(
         duration_s=last.t - first.t,
         distance_m=forward,  # /odom 位置单位为 m
@@ -108,6 +168,7 @@ def analyze(samples: list[Sample]) -> DriftReport:
         encoder_yaw_deg=encoder_yaw,
         imu_yaw_deg=imu_yaw,
         implied_travel_ratio=implied_ratio,
+        slip_events=slip_events,
         diagnosis=diagnosis,
     )
 
@@ -120,8 +181,12 @@ def format_report(report: DriftReport) -> str:
         f"encoder yaw     : {report.encoder_yaw_deg:+.2f} deg  (+ = left)",
         f"IMU yaw         : {report.imu_yaw_deg:+.2f} deg  (+ = left)",
         "right/left ratio: " + (f"{report.implied_travel_ratio:.4f}  (x current "
-                                "LEAP_RIGHT_LEFT_TRAVEL_RATIO = new calibration)"
+                                "LEAP_RIGHT_LEFT_TRAVEL_RATIO = new calibration"
+                                + (", from data before the first slip)" if report.slip_events else ")")
                                 if report.implied_travel_ratio is not None else "n/a"),
+        "slip events     : " + ("none" if not report.slip_events else "; ".join(
+            f"at {fwd:.2f} m encoders diverged {change:+.1f} deg from IMU"
+            for fwd, change in report.slip_events)),
         f"diagnosis       : {report.diagnosis}",
     ))
 
