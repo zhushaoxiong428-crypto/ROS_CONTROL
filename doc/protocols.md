@@ -49,7 +49,9 @@
 | `/cmd_vel` | `geometry_msgs/msg/Twist` | sensor data | `linear.x/y` 由 m/s 转为目标 `vx/vy`，单位 mm/s；`angular.z` 转为目标 `wz`，单位 rad/s |
 | `/host_info` | `std_msgs/msg/String` | sensor data | 目标主机信息：`hostname=<name> ip=<ipv4>` 或 `hostname=<name> hostip=<ipv4>` |
 
-收到 `/cmd_vel` 后会向 `q_motion_cmd` 写入速度指令，将控制来源标记为 micro-ROS，并清除 `g_emergency_stop`。
+收到 `/cmd_vel` 后会向 `q_motion_cmd` 写入速度指令，并将控制来源标记为 micro-ROS。`/cmd_vel` 不会解除急停。
+
+速度指令需要持续发送：超过 `500 ms`（`motion_config.h` 中的 `kCommandTimeoutMs`）没有收到新指令，底盘会自动停车。MAVLink 的速度和轮速指令同样适用；位置和相对运动指令会自行结束，不受这个超时影响。
 
 ### I²C 手柄控制
 
@@ -136,7 +138,7 @@
 
 | 指令 | 参数 | 结果 |
 | --- | --- | --- |
-| `MAV_CMD_COMPONENT_ARM_DISARM` | `param1 < 0.5`：停止；否则清除急停 | `ACCEPTED` |
+| `MAV_CMD_COMPONENT_ARM_DISARM` | `param1 < 0.5`：上锁，停车并锁存急停；否则解锁，清除急停 | `ACCEPTED` |
 | `MAV_CMD_PREFLIGHT_SET_SENSOR_OFFSETS` | 无 | 复位里程计 |
 | `MAV_CMD_DO_SET_SERVO` | `param2`：舵机角度 | 写入 `q_servo_cmd` |
 | `MAV_CMD_DO_SET_ACTUATOR` | `param1`：左轮目标，`param2`：右轮目标 | 轮速模式 |

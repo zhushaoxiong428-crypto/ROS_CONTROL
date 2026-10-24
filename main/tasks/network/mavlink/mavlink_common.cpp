@@ -250,6 +250,9 @@ static bool IsFiniteMotionMode(uint8_t control_mode) {
 }
 
 static bool IsMavlinkMotionLocked() {
+    if (system_globals().flags.emergency_stop) {
+        return true;
+    }
     if (IsFiniteMotionMode(s_mavlink_motion_mode) && !system_globals().flags.motion_busy) {
         s_mavlink_motion_mode = MATURO_MOTION_VELOCITY;
     }
@@ -776,7 +779,6 @@ static void HandleParamSet(
 static void SendMotionCommand(const MotionMsg &cmd) {
     s_mavlink_motion_mode = cmd.control_mode;
     xQueueOverwrite(system_globals().queues.motion_cmd, &cmd);
-    system_globals().flags.emergency_stop = false;
 }
 
 static uint8_t HandleSetPositionTargetLocalNed(const mavlink_message_t *msg, uint8_t motion_source) {
@@ -825,6 +827,8 @@ static uint8_t HandleCommandLong(const mavlink_message_t *msg, uint8_t motion_so
     switch (command.command) {
         case MAV_CMD_COMPONENT_ARM_DISARM: {
             if (command.param1 < 0.5f) {
+                // 上锁即急停：锁存到显式解锁为止，运动指令不会自动解除。
+                system_globals().flags.emergency_stop = true;
                 MotionMsg stop_cmd = {};
                 stop_cmd.source = motion_source;
                 stop_cmd.control_mode = MATURO_MOTION_VELOCITY;

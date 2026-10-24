@@ -4,6 +4,7 @@
 #include "msg/motion_msg.h"
 #include "msg/pid_msg.h"
 #include "msg/imu_msg.h"  
+#include "command_watchdog.h"
 #include "esp_log.h"
 #include <cmath>          
 
@@ -23,6 +24,7 @@ void motion_task(void *p) {
 
     int current_mode = 0;
     bool was_gamepad_override_active = false;
+    CommandWatchdog nav_watchdog(leap_config::motion::kCommandTimeoutMs);
 
     auto apply_command = [&](const MotionMsg& command) {
         current_mode = command.control_mode;
@@ -44,12 +46,14 @@ void motion_task(void *p) {
     };
     
     while (1) {
+        const uint32_t now_ms = pdTICKS_TO_MS(xTaskGetTickCount());
         xQueuePeek(system_globals().queues.imu_state, &imu_msg, 0);
                  
         // 1. 接收底层运动指令 (指令状态机)
         const bool nav_cmd_received = xQueueReceive(system_globals().queues.motion_cmd, &incoming_msg, 0) == pdTRUE;
         if (nav_cmd_received) {
             cmd_msg = incoming_msg;
+            nav_watchdog.Feed(now_ms);
         }
 
         const bool gamepad_override_active = system_globals().flags.gamepad_override_active;
@@ -62,6 +66,21 @@ void motion_task(void *p) {
             apply_command(active_cmd);
         }
         was_gamepad_override_active = gamepad_override_active;
+
+        // 指令超时：速度类指令的发送方停发后停车，并清掉旧指令，
+        // 防止手柄退出接管时重新执行过期的速度。
+        if (!gamepad_override_active && nav_watchdog.IsArmed() &&
+            IsStreamingMotionMode(active_cmd.control_mode) &&
+            !nav_watchdog.IsFresh(now_ms)) {
+            ESP_LOGW(TAG, "No motion command for %lu ms, stopping",
+                     static_cast<unsigned long>(leap_config::motion::kCommandTimeoutMs));
+            nav_watchdog.Disarm();
+            const uint8_t source = active_cmd.source;
+            cmd_msg = MotionMsg{};
+            cmd_msg.source = source;
+            active_cmd = cmd_msg;
+            apply_command(active_cmd);
+        }
 
         // 2. 接收 PID 指令 (速度环)
         if (xQueueReceive(system_globals().queues.speedpid_cmd, &speed_msg, 0) == pdTRUE) {

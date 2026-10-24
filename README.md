@@ -74,7 +74,16 @@ g++ -std=c++17 -Wall -Wextra -Werror -I main/config -I main/control \
     tests/differential_kinematics_test.cpp main/control/differential_kinematics.cpp \
     -o /tmp/leap_low_kinematics_test
 /tmp/leap_low_kinematics_test
+
+g++ -std=c++17 -Wall -Wextra -Werror -I main/control \
+    tests/command_watchdog_test.cpp -o /tmp/leap_command_watchdog_test
+/tmp/leap_command_watchdog_test
 ```
+
+## 运动安全
+
+- **指令超时**：速度类指令（`/cmd_vel`、MAVLink 速度和轮速指令）超过 `500 ms` 没有更新就自动停车，阈值为 `motion_config.h` 中的 `kCommandTimeoutMs`。
+- **急停锁存**：MAVLink `MAV_CMD_COMPONENT_ARM_DISARM` 上锁（`param1 = 0`）后急停锁存，此时 MAVLink 运动指令返回 `DENIED`，手柄和 `/cmd_vel` 也无法驱动底盘，只有解锁（`param1 = 1`）能解除。
 
 上板验证应覆盖前进/后退/原地转向、手柄接管、四种通信模式、ROS 电池和超声波话题，以及配网和 PID 保存重启。
 

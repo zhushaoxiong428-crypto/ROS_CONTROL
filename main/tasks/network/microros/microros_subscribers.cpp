@@ -14,7 +14,6 @@ void handle_cmd_vel(const geometry_msgs__msg__Twist *msg) {
     cmd.target_vy = static_cast<float>(msg->linear.y * 1000.0);
     cmd.target_wz = static_cast<float>(msg->angular.z);
     xQueueOverwrite(system_globals().queues.motion_cmd, &cmd);
-    system_globals().flags.emergency_stop = false;
 }
 
 static void copy_host_info_field(char *out, size_t out_size, const char *start, size_t len) {

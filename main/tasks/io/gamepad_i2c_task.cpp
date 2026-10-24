@@ -194,7 +194,6 @@ void PublishGamepadMotion(const GamepadMotion& motion) {
 
     xQueueOverwrite(system_globals().queues.gamepad_motion_cmd, &cmd);
     SetGamepadOverrideActive(true);
-    system_globals().flags.emergency_stop = false;
 }
 
 void LogFrame(const GamepadData_t& frame) {
