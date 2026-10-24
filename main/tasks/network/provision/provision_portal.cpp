@@ -3,6 +3,7 @@
 #include "system_globals.h"
 #include "camera_i2c_client.h"
 #include "wifi_app.h"
+#include "agent_discovery.h"
 #include "msg/battery_msg.h"
 #include "msg/gamepad_msg.h"
 #include "msg/imu_msg.h"
@@ -894,7 +895,7 @@ static esp_err_t runtime_config_post_handler(httpd_req_t *req) {
         httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "invalid comm mode");
         return ESP_FAIL;
     }
-    if (!is_valid_ipv4_address(agent_ip)) {
+    if (!IsAutoAgentIp(agent_ip) && !is_valid_ipv4_address(agent_ip)) {
         httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "invalid micro-ROS agent IP");
         return ESP_FAIL;
     }

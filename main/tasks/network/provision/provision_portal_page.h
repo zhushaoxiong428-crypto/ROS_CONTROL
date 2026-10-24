@@ -408,7 +408,7 @@ static const char kProvisionHtmlTemplate[] = R"HTML(
         </div>
         <div>
           <label id="agent-ip-label" for="agent-ip">micro-ROS Agent IP</label>
-          <input id="agent-ip" name="microros_agent_ip" maxlength="15" inputmode="decimal" required>
+          <input id="agent-ip" name="microros_agent_ip" maxlength="15" placeholder="auto" required>
         </div>
         <div>
           <label id="agent-port-label" for="agent-port">micro-ROS Agent Port</label>
@@ -566,7 +566,7 @@ static const char kProvisionHtmlTemplate[] = R"HTML(
         runtimeSaved: '已保存，设备正在重启...',
         runtimeSaveFailed: (message) => `保存失败：${message}`,
         commModeLabel: '默认通信协议',
-        agentIpLabel: 'micro-ROS Agent IP',
+        agentIpLabel: 'micro-ROS Agent IP（填 auto 自动发现）',
         agentPortLabel: 'micro-ROS Agent Port',
         runtimeSubmit: '保存通信设置并重启',
         cameraProvisionSaved: '摄像头配网命令已发送，等待摄像头重启或更新状态...',
@@ -630,7 +630,7 @@ static const char kProvisionHtmlTemplate[] = R"HTML(
         runtimeSaved: 'Saved. Device is restarting...',
         runtimeSaveFailed: (message) => `Save failed: ${message}`,
         commModeLabel: 'Default Protocol',
-        agentIpLabel: 'micro-ROS Agent IP',
+        agentIpLabel: 'micro-ROS Agent IP (auto = discover)',
         agentPortLabel: 'micro-ROS Agent Port',
         runtimeSubmit: 'Save Settings and Restart',
         cameraProvisionSaved: 'Camera provisioning command sent. Waiting for the camera to restart or update status...',

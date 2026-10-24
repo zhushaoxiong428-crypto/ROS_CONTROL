@@ -20,7 +20,8 @@ static constexpr const char *kRuntimeCfgMicroRosAgentIpKey = "uros_ip";
 static constexpr const char *kRuntimeCfgMicroRosAgentPortKey = "uros_port";
 static constexpr const char *kDefaultStaSsid = "Maturo";
 static constexpr const char *kDefaultStaPassword = "maturo2026";
-static constexpr const char *kDefaultMicroRosAgentIp = "192.168.31.214";
+// "auto" finds the agent on the local subnet; an IPv4 address pins one agent.
+static constexpr const char *kDefaultMicroRosAgentIp = "auto";
 static constexpr uint16_t kDefaultMicroRosAgentPort = 8888;
 
 static constexpr uart_port_t kMicroRosUartPort = UART_NUM_0;

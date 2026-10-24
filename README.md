@@ -11,6 +11,7 @@
 本仓库基于上游项目 [czu963889306-dev/leap_ros_mcu_driver](https://github.com/czu963889306-dev/leap_ros_mcu_driver)（`v2.1` 之后的 `78389aca`）。在上游基础上的改动：
 
 - **运动安全**：速度指令超时停车；急停改为锁存，之前它从未被置位（见下文“运动安全”）。
+- **Agent 自动发现**：Agent IP 填 `auto` 时，小车在本网段自动找到 micro-ROS Agent，电脑 IP 变化后也能自动重连（见 [doc/protocols.md](doc/protocols.md)）。连不上 Agent 时串口会给出告警，不再静默重试。
 - **可复现构建**：micro-ROS 组件移到 `components/`，锁文件不再依赖作者机器的绝对路径；新增 `tools/prepare_build.sh`。
 - **测试与 CI**：主机单元测试改用 CMake/CTest 管理；GitHub Actions 自动编译固件并运行主机测试。
 
@@ -63,7 +64,7 @@ main/
 | 修改内容 | 文件 | 配置项 |
 | --- | --- | --- |
 | micro-ROS UART 启动等待 | `main/config/network_config.h` | `kMicroRosUartStartupDelayMs`，默认 `5000`；设为 `10000` 即等待 10 秒 |
-| Agent 默认地址和端口 | `main/config/network_config.h` | `kDefaultMicroRosAgentIp`、`kDefaultMicroRosAgentPort` |
+| Agent 默认地址和端口 | `main/config/network_config.h` | `kDefaultMicroRosAgentIp`（默认 `auto`，自动发现）、`kDefaultMicroRosAgentPort` |
 | micro-ROS / MAVLink 串口波特率 | `main/config/network_config.h` | `kMicroRosUartBaudRate` / `kMavlinkUartBaudRate` |
 | 雷达串口和波特率 | `main/config/network_config.h` | `kLidarUartPort`、`kLidarBaudRate` |
 | 电机、编码器、传感器引脚 | `main/config/board_config.h` | 对应的 `kMotor*`、`kEncoder*`、`kUltrasonic*` 等 |

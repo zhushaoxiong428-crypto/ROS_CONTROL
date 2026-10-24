@@ -15,7 +15,7 @@
 | MAVLink UDP | `mavlink_udp` | 否 |
 | MAVLink UART | `uart_mavlink` | 否 |
 
-通信模式保存在 NVS 的运行配置中，可通过网页配置页面修改。默认 micro-ROS agent 地址为 `192.168.31.214:8888`。
+通信模式保存在 NVS 的运行配置中，可通过网页配置页面修改。默认 micro-ROS agent 地址为 `auto:8888`，即自动发现，见下文“Agent 自动发现”。
 
 ## 单位约定
 
@@ -39,7 +39,7 @@
 | --- | --- |
 | 节点名称 | `leap_ros` |
 | 本地 UDP 端口 | `CONFIG_MICRO_ROS_LOCAL_PORT`，默认 `8888` |
-| Agent 地址 | 运行时 `g_microros_agent_ip:g_microros_agent_port`，默认 `192.168.31.214:8888` |
+| Agent 地址 | 运行时 `g_microros_agent_ip:g_microros_agent_port`，默认 `auto:8888` |
 | 定时器周期 | 20 ms |
 
 ### 订阅话题
@@ -249,6 +249,16 @@ MAVLink 电池字段：
 | `uart_mavlink` | MAVLink UART 任务接收和发布；micro-ROS 与 MAVLink UDP 不工作 |
 
 网页运行配置会将通信模式和 micro-ROS agent 地址保存到 NVS，重启后仍然生效。
+
+### Agent 自动发现
+
+Agent IP 填 `auto` 时（默认值，仅 `micro_ros` UDP 模式有效），小车会自己找 Agent，电脑不需要运行额外的程序：
+
+1. 小车把 XRCE-DDS 的 ping（`GET_INFO`）发到本网段广播地址，并逐个发给网段内的每台主机。网段大于 `/24` 时只发广播。逐个发送是为了兜底那些会丢弃客户端之间广播的热点。
+2. 第一个回复合法应答的主机被当作 Agent，串口打印 `Discovered micro-ROS agent at <ip>:<port>`。
+3. 断线重连时先试上次找到的 Agent，不通再重新扫描；电脑换了 IP 也能自动找回，不用重启小车。
+
+Agent 端口不会自动发现，仍需与配置一致（默认 `8888`）。同一网络里有多台电脑运行 Agent 时，自动发现会连上第一个应答的那台；要固定连某一台，就在配置页填写它的 IPv4 地址。
 
 ## BOOT 键回到配网模式
 

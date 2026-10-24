@@ -22,3 +22,7 @@ add_test(NAME differential_kinematics COMMAND differential_kinematics_test)
 add_executable(command_watchdog_test command_watchdog_test.cpp)
 target_include_directories(command_watchdog_test PRIVATE ${FIRMWARE_DIR}/control)
 add_test(NAME command_watchdog COMMAND command_watchdog_test)
+
+add_executable(agent_discovery_test agent_discovery_test.cpp)
+target_include_directories(agent_discovery_test PRIVATE ${FIRMWARE_DIR}/network)
+add_test(NAME agent_discovery COMMAND agent_discovery_test)

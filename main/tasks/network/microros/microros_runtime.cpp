@@ -21,6 +21,13 @@ static void log_agent_unreachable() {
         return;
     }
     s_agent_unreachable_log_tick = now;
+    if (IsAutoAgentIp(system_globals().runtime.microros_agent_ip)) {
+        ESP_LOGW(kTag, "no micro-ROS agent found on the local network, port %u (%lu attempts); "
+                       "check the agent is running and on the same Wi-Fi as the robot",
+                 static_cast<unsigned>(system_globals().runtime.microros_agent_port),
+                 static_cast<unsigned long>(s_agent_ping_failures));
+        return;
+    }
     ESP_LOGW(kTag, "micro-ROS agent %s:%u not responding (%lu attempts); "
                    "check the agent is running and the agent IP on the provisioning page",
              system_globals().runtime.microros_agent_ip,
@@ -92,8 +99,7 @@ static bool create_ros_entities() {
     MICROROS_RCCHECK(rcl_init_options_init(&s_init_options, s_allocator));
     s_init_options_initialized = true;
 
-    const rmw_ret_t ping_ret = rmw_uros_ping_agent(ros_cfg::kInitialAgentPingTimeoutMs, ros_cfg::kInitialAgentPingAttempts);
-    if (ping_ret != RMW_RET_OK) {
+    if (!ping_agent()) {
         log_agent_unreachable();
         return false;
     }
@@ -446,8 +452,10 @@ void microros_runtime_loop(void) {
                                  static_cast<int>(net_cfg::kMicroRosUartRxPin),
                                  net_cfg::kMicroRosUartBaudRate);
                     } else {
+                        char agent_ip[16] = {};
+                        inet_ntop(AF_INET, &s_udp_ctx.remote.sin_addr, agent_ip, sizeof(agent_ip));
                         ESP_LOGI(kTag, "micro-ROS active: agent=%s:%u, pub=/odom,/imu,/scan,/battery_state,/ultrasonic,/wifi_config, sub=/cmd_vel,/host_info, srv=/set_speed_pid,/get_speed_pid",
-                                 system_globals().runtime.microros_agent_ip,
+                                 agent_ip,
                                  static_cast<unsigned>(system_globals().runtime.microros_agent_port));
                     }
                 } else {

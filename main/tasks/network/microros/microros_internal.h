@@ -10,6 +10,7 @@
 #include "driver/gpio.h"
 #include "driver/uart.h"
 #include "esp_log.h"
+#include "esp_netif.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "lwip/inet.h"
@@ -46,6 +47,7 @@
 #include "std_msgs/msg/string.h"
 #include "uxr/client/profile/transport/custom/custom_transport.h"
 
+#include "agent_discovery.h"
 #include "network_config.h"
 #include "ros_config.h"
 
@@ -59,6 +61,12 @@ struct UdpTransportContext {
     int fd;
     sockaddr_in remote;
     uint16_t local_port;
+    // Agent discovery: writes go to the whole subnet and reads remember the
+    // sender, so the agent that answers a ping becomes the remote.
+    bool discovering;
+    uint32_t local_ip;      // host byte order
+    uint32_t netmask;       // host byte order
+    sockaddr_in last_sender;
 };
 
 struct UartTransportContext {
@@ -127,6 +135,7 @@ extern char s_last_wifi_config_ssid[33];
 
 bool setup_udp_transport();
 bool setup_uart_transport();
+bool ping_agent();
 void cleanup_result(rcl_ret_t ret);
 void reset_ros_handles();
 void handle_cmd_vel(const geometry_msgs__msg__Twist *msg);

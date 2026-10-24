@@ -41,6 +41,8 @@ static constexpr float kUltrasonicRangeMaxM = 4.0f;
 static constexpr int kInitialAgentPingTimeoutMs = 300;
 static constexpr uint8_t kInitialAgentPingAttempts = 3;
 static constexpr uint32_t kAgentUnreachableLogPeriodMs = 10000;
+static constexpr int kAgentDiscoveryTimeoutMs = 500;
+static constexpr uint8_t kAgentDiscoveryAttempts = 2;
 
 }  // namespace ros
 }  // namespace leap_config
