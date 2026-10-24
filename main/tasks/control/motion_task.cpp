@@ -12,6 +12,13 @@
 
 static const char *TAG = "MOTION_TASK";
 
+// Mode 6 carries left/right wheel speeds in target_vx/target_vy and mode 3
+// one wheel in target_motor_v, so check every target field.
+static bool CommandsMotion(const MotionMsg& cmd) {
+    return std::fabs(cmd.target_vx) > 0.001f || std::fabs(cmd.target_vy) > 0.001f ||
+           std::fabs(cmd.target_wz) > 0.001f || std::fabs(cmd.target_motor_v) > 0.001f;
+}
+
 static void log_timing(const CycleTimingStats::Summary& s) {
     // UART0 carries the XRCE-DDS stream in micro-ROS UART mode.
     if (system_globals().runtime.wifi_comm_mode == WifiCommMode::kMicroRosUart) {
@@ -102,8 +109,10 @@ void motion_task(void *p) {
         if (!gamepad_override_active && nav_watchdog.IsArmed() &&
             IsStreamingMotionMode(active_cmd.control_mode) &&
             !nav_watchdog.IsFresh(now_ms)) {
-            ESP_LOGW(TAG, "No motion command for %lu ms, stopping",
-                     static_cast<unsigned long>(leap_config::motion::kCommandTimeoutMs));
+            if (CommandsMotion(active_cmd)) {
+                ESP_LOGW(TAG, "No motion command for %lu ms, stopping",
+                         static_cast<unsigned long>(leap_config::motion::kCommandTimeoutMs));
+            }
             nav_watchdog.Disarm();
             const uint8_t source = active_cmd.source;
             cmd_msg = MotionMsg{};
