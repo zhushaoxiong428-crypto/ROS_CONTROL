@@ -29,7 +29,7 @@ static void log_timing(const CycleTimingStats::Summary& s) {
 }
 
 void motion_task(void *p) {
-    const float dt = leap_config::motion::kControlLoopDtS;
+    const int64_t nominal_period_us = leap_config::motion::kControlLoopPeriodMs * 1000;
     MotionMsg cmd_msg = {};
     MotionMsg incoming_msg = {};
     MotionMsg gamepad_cmd = {};
@@ -43,9 +43,9 @@ void motion_task(void *p) {
     int current_mode = 0;
     bool was_gamepad_override_active = false;
     CommandWatchdog nav_watchdog(leap_config::motion::kCommandTimeoutMs);
-    CycleTimingStats timing(leap_config::motion::kControlLoopPeriodMs * 1000,
-                            leap_config::motion::kControlLoopOverrunMarginUs);
+    CycleTimingStats timing(nominal_period_us, leap_config::motion::kControlLoopOverrunMarginUs);
     int64_t last_wake_us = esp_timer_get_time();
+    TickType_t last_wake_tick = xTaskGetTickCount();
     // The first period and the one after each report (which includes the
     // UART log write) are not representative; leave them out.
     bool skip_timing_sample = true;
@@ -73,6 +73,9 @@ void motion_task(void *p) {
         const int64_t wake_us = esp_timer_get_time();
         const int64_t period_us = wake_us - last_wake_us;
         last_wake_us = wake_us;
+        // Wake-up latency makes real periods vary by about +/-1 ms around
+        // 20 ms; velocity is encoder delta / dt, so use the measured period.
+        const float dt = ClampLoopDtS(period_us, nominal_period_us);
         const uint32_t now_ms = pdTICKS_TO_MS(xTaskGetTickCount());
         xQueuePeek(system_globals().queues.imu_state, &imu_msg, 0);
                  
@@ -161,6 +164,6 @@ void motion_task(void *p) {
             skip_timing_sample = true;
         }
 
-        vTaskDelay(pdMS_TO_TICKS(leap_config::motion::kControlLoopPeriodMs));
+        vTaskDelayUntil(&last_wake_tick, pdMS_TO_TICKS(leap_config::motion::kControlLoopPeriodMs));
     }
 }

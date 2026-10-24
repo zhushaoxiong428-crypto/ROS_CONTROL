@@ -1,0 +1,8 @@
+I (23560) MOTION_TASK: control loop (20 ms) n=500 period mean=20.000 std=0.061 min=19.559 max=20.442 ms |jitter|max=0.442 ms busy mean=0.273 max=0.815 ms overruns=0
+I (33580) MOTION_TASK: control loop (20 ms) n=500 period mean=20.000 std=0.056 min=19.745 max=20.254 ms |jitter|max=0.255 ms busy mean=0.273 max=0.606 ms overruns=0
+I (43600) MOTION_TASK: control loop (20 ms) n=500 period mean=20.000 std=0.060 min=19.693 max=20.308 ms |jitter|max=0.308 ms busy mean=0.274 max=0.585 ms overruns=0
+I (53620) MOTION_TASK: control loop (20 ms) n=500 period mean=20.000 std=0.063 min=19.712 max=20.286 ms |jitter|max=0.288 ms busy mean=0.272 max=0.729 ms overruns=0
+I (63640) MOTION_TASK: control loop (20 ms) n=500 period mean=20.000 std=0.078 min=19.429 max=20.572 ms |jitter|max=0.572 ms busy mean=0.283 max=0.850 ms overruns=0
+I (73660) MOTION_TASK: control loop (20 ms) n=500 period mean=20.000 std=0.149 min=18.994 max=21.008 ms |jitter|max=1.008 ms busy mean=0.351 max=1.107 ms overruns=0
+I (83680) MOTION_TASK: control loop (20 ms) n=500 period mean=20.000 std=0.166 min=18.811 max=21.190 ms |jitter|max=1.190 ms busy mean=0.347 max=1.390 ms overruns=0
+I (93700) MOTION_TASK: control loop (20 ms) n=500 period mean=20.000 std=0.069 min=19.501 max=20.502 ms |jitter|max=0.502 ms busy mean=0.284 max=0.806 ms overruns=0

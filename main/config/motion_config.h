@@ -31,7 +31,6 @@ static constexpr int kRelativeTurnSettleMaxCycles = 5;
 static constexpr float kRelativeTurnSettleVxMms = 10.0f;
 static constexpr float kDefaultMaxAccelerationRpmS = 200.0f;
 static constexpr uint32_t kControlLoopPeriodMs = 20;
-static constexpr float kControlLoopDtS = kControlLoopPeriodMs / 1000.0f;
 // Streamed velocity commands older than this stop the robot (same default as
 // ros2_control diff_drive_controller cmd_vel_timeout).
 static constexpr uint32_t kCommandTimeoutMs = 500;
