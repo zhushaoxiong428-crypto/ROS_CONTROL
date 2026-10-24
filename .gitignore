@@ -5,6 +5,7 @@
 
 build/
 build-tests/
+build-diag/
 sdkconfig.old
 *.log
 

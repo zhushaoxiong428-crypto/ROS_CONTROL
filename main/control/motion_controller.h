@@ -6,7 +6,7 @@
 #include "pid_controller.h"
 #include "differential_kinematics.h"
 
-enum class ControlMode { kVelocity, kPosition, kRelativeSeq };
+enum class ControlMode { kVelocity, kPosition, kRelativeSeq, kOpenLoopPwm };
 enum class SeqState { kIdle, kForward, kSettle, kTurn };
 
 enum class MotorID {
@@ -40,6 +40,9 @@ class MotionController {
   void Drive(float linear_x, float linear_y, float angular_z);
   void GetVelocity(float* linear_x, float* linear_y, float* angular_z) const;
   void SetVelocityPidGains(float kp, float ki, float kd);
+  // Drive both motors with raw PWM (-255..255), bypassing the speed PID.
+  // For motor characterization only; Stop() or any other command ends it.
+  void SetOpenLoopPwm(float left_pwm, float right_pwm);
   void Update(float dt, float current_imu_yaw_rad);
   void Stop();
 
@@ -57,6 +60,7 @@ class MotionController {
   float final_target_vel_[kNumWheels] = {0};
   int32_t last_count_[kNumWheels] = {0};
   float filtered_rpm_[kNumWheels] = {0};
+  int16_t open_loop_pwm_[kNumWheels] = {0};
 
   ControlMode control_mode_ = ControlMode::kVelocity;
 

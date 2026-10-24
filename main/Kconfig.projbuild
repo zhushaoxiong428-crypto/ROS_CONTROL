@@ -4,4 +4,15 @@ menu "Leap low settings"
         string "micro-ROS local UDP port"
         default "8888"
 
+    config LEAP_MOTOR_CHARACTERIZATION
+        bool "Open-loop motor PWM over /cmd_vel (diagnostic build)"
+        default n
+        help
+            For measuring the PWM-to-speed curve of each wheel
+            (tools/motor_characterization.py). A /cmd_vel message with a
+            non-zero linear.z or angular.x drives the left / right motor with
+            that raw PWM (-255..255), bypassing the speed PID. The command
+            timeout and emergency stop still apply. Leave off in normal
+            firmware.
+
 endmenu

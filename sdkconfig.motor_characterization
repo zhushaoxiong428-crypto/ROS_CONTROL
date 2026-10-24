@@ -1,0 +1,2 @@
+# Diagnostic build for tools/motor_characterization.py; see main/Kconfig.projbuild.
+CONFIG_LEAP_MOTOR_CHARACTERIZATION=y

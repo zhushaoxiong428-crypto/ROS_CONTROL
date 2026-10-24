@@ -42,4 +42,5 @@ int main() {
     assert(!IsStreamingMotionMode(2));
     assert(IsStreamingMotionMode(3));
     assert(IsStreamingMotionMode(6));
+    assert(IsStreamingMotionMode(7));
 }

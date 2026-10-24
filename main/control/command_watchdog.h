@@ -29,9 +29,9 @@ class CommandWatchdog final {
   bool armed_ = false;
 };
 
-// Modes 0 (body velocity), 3 (single wheel) and 6 (both wheels) hold a speed
-// until the next command, so they need the watchdog. Position and relative
-// moves finish on their own.
+// Modes 0 (body velocity), 3 (single wheel), 6 (both wheels) and 7 (open-loop
+// PWM) hold their output until the next command, so they need the watchdog.
+// Position and relative moves finish on their own.
 inline bool IsStreamingMotionMode(int control_mode) {
-  return control_mode == 0 || control_mode == 3 || control_mode == 6;
+  return control_mode == 0 || control_mode == 3 || control_mode == 6 || control_mode == 7;
 }

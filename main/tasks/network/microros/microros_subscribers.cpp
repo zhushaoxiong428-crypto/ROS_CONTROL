@@ -13,6 +13,14 @@ void handle_cmd_vel(const geometry_msgs__msg__Twist *msg) {
     cmd.target_vx = static_cast<float>(msg->linear.x * 1000.0);
     cmd.target_vy = static_cast<float>(msg->linear.y * 1000.0);
     cmd.target_wz = static_cast<float>(msg->angular.z);
+#if CONFIG_LEAP_MOTOR_CHARACTERIZATION
+    // Diagnostic build: linear.z / angular.x carry raw left / right motor PWM.
+    if (msg->linear.z != 0.0 || msg->angular.x != 0.0) {
+        cmd.control_mode = kMotionModeOpenLoopPwm;
+        cmd.target_pwm_left = static_cast<float>(msg->linear.z);
+        cmd.target_pwm_right = static_cast<float>(msg->angular.x);
+    }
+#endif
     xQueueOverwrite(system_globals().queues.motion_cmd, &cmd);
 }
 

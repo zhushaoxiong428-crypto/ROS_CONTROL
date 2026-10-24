@@ -12,11 +12,12 @@
 
 static const char *TAG = "MOTION_TASK";
 
-// Mode 6 carries left/right wheel speeds in target_vx/target_vy and mode 3
-// one wheel in target_motor_v, so check every target field.
+// Mode 6 carries left/right wheel speeds in target_vx/target_vy, mode 3 one
+// wheel in target_motor_v and mode 7 raw PWM, so check every target field.
 static bool CommandsMotion(const MotionMsg& cmd) {
     return std::fabs(cmd.target_vx) > 0.001f || std::fabs(cmd.target_vy) > 0.001f ||
-           std::fabs(cmd.target_wz) > 0.001f || std::fabs(cmd.target_motor_v) > 0.001f;
+           std::fabs(cmd.target_wz) > 0.001f || std::fabs(cmd.target_motor_v) > 0.001f ||
+           std::fabs(cmd.target_pwm_left) > 0.001f || std::fabs(cmd.target_pwm_right) > 0.001f;
 }
 
 static void log_timing(const CycleTimingStats::Summary& s) {
@@ -71,6 +72,8 @@ void motion_task(void *p) {
             robot.SetMotorTargetVelocity((MotorID)command.motor_id, command.target_motor_v);
         } else if (current_mode == 6) {
             robot.SetAllMotorTargetsVelocity(command.target_vx, command.target_vy);
+        } else if (current_mode == kMotionModeOpenLoopPwm) {
+            robot.SetOpenLoopPwm(command.target_pwm_left, command.target_pwm_right);
         } else {
             ESP_LOGW(TAG, "Unsupported motion mode: %d", current_mode);
         }

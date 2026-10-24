@@ -223,6 +223,14 @@ void MotionController::Update(float dt, float current_imu_yaw_rad) {
     CalculateKinematics(cmd_vx, 0.0f, vw_cmd);
   }
 
+  // 开环 PWM：跳过速度环和死区补偿，原样输出
+  if (control_mode_ == ControlMode::kOpenLoopPwm) {
+    for (int i = 0; i < kNumWheels; ++i) {
+      motors_[i]->SetSpeed(open_loop_pwm_[i]);
+    }
+    return;
+  }
+
   // 4. 下发电机控制指令与PID计算
   float max_rpm_step = max_accel_rpm_s_ * dt;
   bool velocity_stop_command = (control_mode_ == ControlMode::kVelocity);
@@ -292,6 +300,19 @@ void MotionController::Stop() {
 void MotionController::SetVelocityPidGains(float kp, float ki, float kd) {
   for (int i = 0; i < kNumWheels; ++i) {
     pid_vel_[i].SetGains(kp, ki, kd);
+  }
+}
+
+void MotionController::SetOpenLoopPwm(float left_pwm, float right_pwm) {
+  control_mode_ = ControlMode::kOpenLoopPwm;
+  const float pwm[kNumWheels] = {left_pwm, right_pwm};
+  for (int i = 0; i < kNumWheels; ++i) {
+    open_loop_pwm_[i] = static_cast<int16_t>(
+        std::lround(std::clamp(pwm[i], -motion_cfg::kMaxPwm, motion_cfg::kMaxPwm)));
+    // Leaving open loop must not resume from stale PID state.
+    pid_vel_[i].Reset();
+    target_vel_[i] = 0.0f;
+    final_target_vel_[i] = 0.0f;
   }
 }
 
