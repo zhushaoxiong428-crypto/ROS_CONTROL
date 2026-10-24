@@ -13,8 +13,10 @@ static constexpr float kRpmToMmS = (3.14159265358979323846 * kWheelDiameterMm) /
 static constexpr float kMmSToRpm = 1.0f / kRpmToMmS;
 static constexpr float kPulsesPerWheelRev = 4680.0f;
 static constexpr int kEncoderSigns[kWheelCount] = {-1, 1};
-static constexpr float kDefaultSpeedKp = 1.0f;
-static constexpr float kDefaultSpeedKi = 6.0f;
+// Tuned on the ground (data/pid_grid_20261023_ground): kp=1.2/ki=4 keeps
+// steady error < 0.5 % with 4 % mean overshoot at 0.05-0.1 m/s.
+static constexpr float kDefaultSpeedKp = 1.2f;
+static constexpr float kDefaultSpeedKi = 4.0f;
 static constexpr float kDefaultSpeedKd = 0.0f;
 static constexpr float kDefaultPositionKp = 2.1f;
 static constexpr float kDefaultPositionKi = 0.0f;
