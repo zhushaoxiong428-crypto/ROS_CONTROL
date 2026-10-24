@@ -1,0 +1,7 @@
+test,run,odom_forward_m,odom_left_m,odom_heading_deg,imu_heading_deg,measured_forward_m,measured_lateral
+straight_1m,1,1.015,-0.022,-1.9,0.9,1.00,not visible
+straight_1m,2,1.019,-0.018,-1.1,2.4,1.00,slightly right
+straight_1m,3,1.017,-0.024,-1.2,1.4,1.00,slightly right
+spin_360,1,-0.001,0.005,367.2,353.3,,not measured
+spin_360,2,-0.001,0.003,365.2,377.5,,not measured
+spin_360,3,0.000,0.002,366.7,377.0,,not measured
