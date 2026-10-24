@@ -5,10 +5,28 @@
 #include "msg/pid_msg.h"
 #include "msg/imu_msg.h"  
 #include "command_watchdog.h"
+#include "cycle_timing_stats.h"
 #include "esp_log.h"
+#include "esp_timer.h"
 #include <cmath>          
 
 static const char *TAG = "MOTION_TASK";
+
+static void log_timing(const CycleTimingStats::Summary& s) {
+    // UART0 carries the XRCE-DDS stream in micro-ROS UART mode.
+    if (system_globals().runtime.wifi_comm_mode == WifiCommMode::kMicroRosUart) {
+        return;
+    }
+    ESP_LOGI(TAG, "control loop (%lu ms) n=%lu period mean=%.3f std=%.3f min=%.3f max=%.3f ms "
+                  "|jitter|max=%.3f ms busy mean=%.3f max=%.3f ms overruns=%lu",
+             static_cast<unsigned long>(leap_config::motion::kControlLoopPeriodMs),
+             static_cast<unsigned long>(s.count),
+             s.period_mean_us / 1000.0f, s.period_std_us / 1000.0f,
+             s.period_min_us / 1000.0f, s.period_max_us / 1000.0f,
+             s.max_abs_jitter_us / 1000.0f,
+             s.busy_mean_us / 1000.0f, s.busy_max_us / 1000.0f,
+             static_cast<unsigned long>(s.overruns));
+}
 
 void motion_task(void *p) {
     const float dt = leap_config::motion::kControlLoopDtS;
@@ -25,6 +43,12 @@ void motion_task(void *p) {
     int current_mode = 0;
     bool was_gamepad_override_active = false;
     CommandWatchdog nav_watchdog(leap_config::motion::kCommandTimeoutMs);
+    CycleTimingStats timing(leap_config::motion::kControlLoopPeriodMs * 1000,
+                            leap_config::motion::kControlLoopOverrunMarginUs);
+    int64_t last_wake_us = esp_timer_get_time();
+    // The first period and the one after each report (which includes the
+    // UART log write) are not representative; leave them out.
+    bool skip_timing_sample = true;
 
     auto apply_command = [&](const MotionMsg& command) {
         current_mode = command.control_mode;
@@ -46,6 +70,9 @@ void motion_task(void *p) {
     };
     
     while (1) {
+        const int64_t wake_us = esp_timer_get_time();
+        const int64_t period_us = wake_us - last_wake_us;
+        last_wake_us = wake_us;
         const uint32_t now_ms = pdTICKS_TO_MS(xTaskGetTickCount());
         xQueuePeek(system_globals().queues.imu_state, &imu_msg, 0);
                  
@@ -122,7 +149,18 @@ void motion_task(void *p) {
         status_msg.target_vx = active_cmd.target_vx;
         
         xQueueOverwrite(system_globals().queues.motion_state, &status_msg);
-        
+
+        // 6. 控制周期统计
+        if (!skip_timing_sample) {
+            timing.Add(period_us, esp_timer_get_time() - wake_us);
+        }
+        skip_timing_sample = false;
+        if (timing.count() >= leap_config::motion::kTimingReportCycles) {
+            log_timing(timing.Get());
+            timing.Reset();
+            skip_timing_sample = true;
+        }
+
         vTaskDelay(pdMS_TO_TICKS(leap_config::motion::kControlLoopPeriodMs));
     }
 }

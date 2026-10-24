@@ -26,3 +26,7 @@ add_test(NAME command_watchdog COMMAND command_watchdog_test)
 add_executable(agent_discovery_test agent_discovery_test.cpp)
 target_include_directories(agent_discovery_test PRIVATE ${FIRMWARE_DIR}/network)
 add_test(NAME agent_discovery COMMAND agent_discovery_test)
+
+add_executable(cycle_timing_stats_test cycle_timing_stats_test.cpp)
+target_include_directories(cycle_timing_stats_test PRIVATE ${FIRMWARE_DIR}/control)
+add_test(NAME cycle_timing_stats COMMAND cycle_timing_stats_test)
