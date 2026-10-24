@@ -4,6 +4,7 @@
 .agents/
 
 build/
+build-tests/
 sdkconfig.old
 *.log
 
