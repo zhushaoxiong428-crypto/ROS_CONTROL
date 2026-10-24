@@ -2,7 +2,17 @@
 
 软件版本：`v2.1`
 
+[![CI](https://github.com/zhushaoxiong428-crypto/ROS_CONTROL/actions/workflows/ci.yml/badge.svg)](https://github.com/zhushaoxiong428-crypto/ROS_CONTROL/actions/workflows/ci.yml)
+
 `leap_ros` 是 Leap_ROS 底盘的 ESP32-S3 下位机驱动固件，用于电机控制、里程计、IMU、雷达、超声波、电池状态、状态灯和外设数据采集。固件支持 micro-ROS 与 MAVLink 通信模式，并提供 Wi-Fi 配网页用于运行参数配置。
+
+## 项目来源
+
+本仓库基于上游项目 [czu963889306-dev/leap_ros_mcu_driver](https://github.com/czu963889306-dev/leap_ros_mcu_driver)（`v2.1` 之后的 `78389aca`）。在上游基础上的改动：
+
+- **运动安全**：速度指令超时停车；急停改为锁存，之前它从未被置位（见下文“运动安全”）。
+- **可复现构建**：micro-ROS 组件移到 `components/`，锁文件不再依赖作者机器的绝对路径；新增 `tools/prepare_build.sh`。
+- **测试与 CI**：主机单元测试改用 CMake/CTest 管理；GitHub Actions 自动编译固件并运行主机测试。
 
 ## v2.1 更新内容
 
@@ -65,20 +75,24 @@ main/
 
 ## 构建与验证
 
-在已加载 ESP-IDF 环境的终端中执行 `idf.py build`。固件为 `build/leap_ros.bin`，整包为 `build/merged-binary.bin`。
-
-两轮运动学可在主机上独立验证，无需连接开发板：
+使用 ESP-IDF `v5.5.3`。clone 或切换分支后先运行一次 `tools/prepare_build.sh`：micro-ROS 库是预编译好随仓库提供的，但 make 按文件时间戳判断要不要重新编译，刚 checkout 的时间戳是乱序的，可能触发需要联网的完整源码编译。
 
 ```bash
-g++ -std=c++17 -Wall -Wextra -Werror -I main/config -I main/control \
-    tests/differential_kinematics_test.cpp main/control/differential_kinematics.cpp \
-    -o /tmp/leap_low_kinematics_test
-/tmp/leap_low_kinematics_test
-
-g++ -std=c++17 -Wall -Wextra -Werror -I main/control \
-    tests/command_watchdog_test.cpp -o /tmp/leap_command_watchdog_test
-/tmp/leap_command_watchdog_test
+tools/prepare_build.sh
+idf.py build
 ```
+
+固件为 `build/leap_ros.bin`，整包为 `build/merged-binary.bin`。
+
+不依赖硬件的逻辑（差速运动学、指令超时等）有主机单元测试，无需连接开发板：
+
+```bash
+cmake -S tests -B build-tests
+cmake --build build-tests
+ctest --test-dir build-tests --output-on-failure
+```
+
+每次 push 和 PR 都会由 GitHub Actions（[.github/workflows/ci.yml](.github/workflows/ci.yml)）编译固件并运行这些测试，编译出的固件可以在 Actions 页面下载。
 
 ## 运动安全
 
