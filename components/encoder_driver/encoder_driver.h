@@ -28,9 +28,8 @@ class QuadratureEncoder {
 
   pcnt_unit_handle_t pcnt_unit_;
 
-  // 用于将硬件 16 位计数平滑扩展为 32 位计数的变量
-  int16_t last_hw_count_;
-  int32_t accumulated_count_;
+  // 上一次的读数，用于识别溢出补偿尚未完成时的错误读数
+  int32_t last_count_;
 };
 
 #endif  // ENCODER_DRIVER_H_
