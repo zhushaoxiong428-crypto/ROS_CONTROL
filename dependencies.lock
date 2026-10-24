@@ -23,25 +23,10 @@ dependencies:
     source:
       type: idf
     version: 5.5.3
-  micro_ros_espidf_component:
-    dependencies:
-    - name: espressif/esp_wifi_remote
-      rules:
-      - if: target in [esp32p4]
-      version: '>=0.10,<2.0'
-    - name: espressif/esp_hosted
-      rules:
-      - if: target in [esp32p4]
-      version: ~2
-    source:
-      path: /root/maturo_project/leap_ros/managed_components/micro_ros_espidf_component
-      type: local
-    version: '*'
 direct_dependencies:
 - espressif/led_strip
 - espressif/mdns
 - idf
-- micro_ros_espidf_component
-manifest_hash: 8020c06e1c344d222ab17b5dcebab2784def5f487febf5c8b68657a67675a22c
+manifest_hash: c616f5c891c987987dbc15b1b48252311162f1cd6b7b8f51377aee906810309d
 target: esp32s3
 version: 2.0.0

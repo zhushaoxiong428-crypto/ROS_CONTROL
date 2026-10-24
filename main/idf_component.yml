@@ -1,6 +1,4 @@
 dependencies:
-  micro_ros_espidf_component:
-    path: ../managed_components/micro_ros_espidf_component
   espressif/led_strip: "^2.5.5"
   espressif/mdns: "~1.1.0"
   espressif/esp_hosted:
