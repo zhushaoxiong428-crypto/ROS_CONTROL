@@ -3,6 +3,31 @@
 
 namespace microros {
 
+static uint32_t s_agent_ping_failures = 0;
+static TickType_t s_agent_unreachable_log_tick = 0;
+
+// Report an unreachable agent on the first miss, then at most once per
+// kAgentUnreachableLogPeriodMs while it stays unreachable. UART mode shares
+// UART0 with the console, so logging there would corrupt the XRCE-DDS stream.
+static void log_agent_unreachable() {
+    ++s_agent_ping_failures;
+    if (system_globals().runtime.wifi_comm_mode != WifiCommMode::kMicroRos) {
+        return;
+    }
+
+    const TickType_t now = xTaskGetTickCount();
+    if (s_agent_ping_failures > 1 &&
+        now - s_agent_unreachable_log_tick < pdMS_TO_TICKS(ros_cfg::kAgentUnreachableLogPeriodMs)) {
+        return;
+    }
+    s_agent_unreachable_log_tick = now;
+    ESP_LOGW(kTag, "micro-ROS agent %s:%u not responding (%lu attempts); "
+                   "check the agent is running and the agent IP on the provisioning page",
+             system_globals().runtime.microros_agent_ip,
+             static_cast<unsigned>(system_globals().runtime.microros_agent_port),
+             static_cast<unsigned long>(s_agent_ping_failures));
+}
+
 static bool create_ros_entities() {
     s_publish_tick = 0;
     reset_ros_handles();
@@ -69,10 +94,10 @@ static bool create_ros_entities() {
 
     const rmw_ret_t ping_ret = rmw_uros_ping_agent(ros_cfg::kInitialAgentPingTimeoutMs, ros_cfg::kInitialAgentPingAttempts);
     if (ping_ret != RMW_RET_OK) {
-        // ESP_LOGW(kTag, "micro-ROS agent unavailable: %s:%u",
-        //          system_globals().runtime.microros_agent_ip, static_cast<unsigned>(system_globals().runtime.microros_agent_port));
+        log_agent_unreachable();
         return false;
     }
+    s_agent_ping_failures = 0;
 
     s_context = rcl_get_zero_initialized_context();
     MICROROS_RCCHECK(rcl_init(0, nullptr, &s_init_options, &s_context));
