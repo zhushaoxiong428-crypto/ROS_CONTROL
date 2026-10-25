@@ -14,6 +14,37 @@
 - **Agent 自动发现**：Agent IP 填 `auto` 时，小车在本网段自动找到 micro-ROS Agent，电脑 IP 变化后也能自动重连（见 [doc/protocols.md](doc/protocols.md)）。连不上 Agent 时串口会给出告警，不再静默重试。
 - **可复现构建**：micro-ROS 组件移到 `components/`，锁文件不再依赖作者机器的绝对路径；新增 `tools/prepare_build.sh`。
 - **测试与 CI**：主机单元测试改用 CMake/CTest 管理；GitHub Actions 自动编译固件并运行主机测试。
+- **速度控制**：在地面上实测并重新调了速度 PID；另外试过前馈、10 位 PWM 和目标速度斜坡，实测都没有带来改善，所以默认不启用（见 [doc/speed_control.md](doc/speed_control.md)）。
+- **正确性与实时性**：编码器溢出改由 PCNT 驱动累加，并处理了驱动里的读数竞态；控制循环改用 `vTaskDelayUntil`、按实测周期计算 `dt`，并每 10 秒打印一次周期统计。
+- **实车测试工具**：`tools/` 下的脚本通过 ROS 话题驱动小车并记录数据，`data/` 下保存了每一组实测数据。
+
+## 实测结果
+
+除注明“架空”的两项外，都是小车放在地上实测的数据，原始数据见各行链接。速度控制的完整过程，包括没有效果的尝试和中途修正过的测量错误，见 [doc/speed_control.md](doc/speed_control.md)。
+
+| 项目 | 改动前 | 现在 | 数据 |
+| --- | --- | --- | --- |
+| 速度稳态误差（0.1 / 0.2 m/s） | -10.8 % / -14.7 % | 1 % 以内 | [基线](data/baseline_20261023_ground)、[调参](data/pid_grid_20261023_ground) |
+| 0.1 m/s 阶跃到达 90 % | 2.1 s | 0.18–0.22 s | 同上 |
+| 低速（≤ 0.1 m/s）超调 | — | 3.9 %，测量噪声峰值 2.8 % | [调参](data/pid_grid_20261023_ground) |
+| `/cmd_vel` 中断后停车（架空） | 不停，一直按最后的指令行驶 | 最后一条指令后 0.71–0.74 s 停稳 | [超时测试](data/baseline_20261023_suspended) |
+| 控制周期（目标 20 ms） | 未测量 | 均值 20.000 ms，最大抖动 1.3 ms，无超时 | [周期统计](data/loop_timing_20261023) |
+| 编码器跨溢出（架空） | 每次溢出差 1 个计数 | 正反各跨溢出 2 次，速度没有跳变 | [溢出测试](data/encoder_overflow_20261023) |
+| 里程计：直行 1.5 m / 原地转 3 圈 | 未标定 | 误差 0.15 % / < 0.2 % | [里程计标定](data/odom_calibration_20261024) |
+| micro-ROS Agent 连接 | 需要手动填写电脑 IP | Wi-Fi 连上后 0.12 s 自动找到 | — |
+
+调参的取舍：在 `kp=1.2` 下，`ki=4` 比 `ki=6` 的低速超调低一半多，但 -0.2 m/s 的阶跃要慢约 100 ms（269 对 173 ms）。速度测量的分辨率也有上限：0.05 m/s 时，每个 20 ms 周期只有约 23 个编码器计数，1 个计数就相当于 4 % 的速度。
+
+**试过但没有采用的方案**（代码保留，默认关闭）：
+
+- **速度前馈**：按实测电机曲线直接给出 PWM，只有大幅阶跃变快了；电机加速期间积分项持续累积，0.1 m/s 时反而出现 8–11 % 的超调。
+- **10 位 PWM**：没有改善，低速超调还略高（每次 9.9–10.0 %，8 位为 7.0–8.6 %），在实验分支 `exp/pwm-10bit` 上。
+- **目标速度斜坡**：纯 PID 的超调本来就在噪声水平，加斜坡测不出差别。
+
+**已知局限**：
+
+- IMU 航向不可靠：同样原地转了 1084°，四次读数在 1073° 到 1114° 之间；直行 15 秒漂移 2–12°。在查清原因之前，不要用它做航向参考。
+- 急停锁存还没有在实车上验证；micro-ROS 侧也还不能触发急停，因为订阅名额已经用满。
 
 ## v2.1 更新内容
 
@@ -46,7 +77,11 @@ main/
 ├── platform/board.*                  # 硬件对象及初始化
 ├── control/
 │   ├── differential_kinematics.*     # 两轮差速正逆运动学，轮序为左、右
-│   └── motion_controller.*           # PID、里程计、位置和相对运动控制
+│   ├── motion_controller.*           # PID、里程计、位置和相对运动控制
+│   ├── command_watchdog.h            # 速度指令超时
+│   ├── cycle_timing_stats.h          # 控制周期统计
+│   ├── wheel_feedforward.h           # 速度前馈模型（默认关闭）
+│   └── velocity_ramp.h               # 目标速度斜坡（默认关闭）
 ├── network/wifi_app.*                # Wi-Fi 连接及运行配置持久化
 ├── msg/                              # 任务间消息
 └── tasks/
@@ -69,7 +104,9 @@ main/
 | 雷达串口和波特率 | `main/config/network_config.h` | `kLidarUartPort`、`kLidarBaudRate` |
 | 电机、编码器、传感器引脚 | `main/config/board_config.h` | 对应的 `kMotor*`、`kEncoder*`、`kUltrasonic*` 等 |
 | 轮径、轮距、编码器方向 | `main/config/motion_config.h` | `kWheelDiameterMm`、`kTrackWidthMm`、`kEncoderSigns` |
-| 速度 PID 默认值 | `main/config/motion_config.h` | `kDefaultSpeedKp`、`kDefaultSpeedKi`、`kDefaultSpeedKd` |
+| 速度 PID 默认值 | `main/config/motion_config.h` | `kDefaultSpeedKp`、`kDefaultSpeedKi`、`kDefaultSpeedKd`，默认 `1.2 / 4 / 0` |
+| 指令超时 | `main/config/motion_config.h` | `kCommandTimeoutMs`，默认 `500` |
+| 速度前馈、目标速度斜坡 | `main/config/motion_config.h` | `kUseSpeedFeedforward`、`kFf*`、`kDefaultVelocityAccelLimitMps2`；运行时可通过 `POST /api/motion-tuning` 临时修改，不保存 |
 | ROS 名称及发布周期 | `main/config/ros_config.h` | `kNodeName`、`k*Topic`、`k*Service`、`kPublishPeriodMs` |
 
 启动等待只作用于 micro-ROS UART 模式，从通信任务启动时开始计时。编译期参数修改后需要重新编译、烧录。已保存的 Wi-Fi、通信模式、Agent 地址和速度 PID 仍优先使用 NVS 配置；micro-ROS 本地 UDP 端口继续支持 `CONFIG_MICRO_ROS_LOCAL_PORT`。
@@ -85,7 +122,7 @@ idf.py build
 
 固件为 `build/leap_ros.bin`，整包为 `build/merged-binary.bin`。
 
-不依赖硬件的逻辑（差速运动学、指令超时等）有主机单元测试，无需连接开发板：
+不依赖硬件的逻辑有主机单元测试，包括差速运动学、指令超时、Agent 发现的子网计算、控制周期统计、速度前馈和斜坡，无需连接开发板：
 
 ```bash
 cmake -S tests -B build-tests
@@ -94,6 +131,18 @@ ctest --test-dir build-tests --output-on-failure
 ```
 
 每次 push 和 PR 都会由 GitHub Actions（[.github/workflows/ci.yml](.github/workflows/ci.yml)）编译固件并运行这些测试，编译出的固件可以在 Actions 页面下载。
+
+## 实车测试工具
+
+脚本通过 ROS 2 话题驱动小车，运行前需要先 `source /opt/ros/humble/setup.bash`，并确保 micro-ROS Agent 已连接。小车会移动，测试前请把轮子架空，或者在地上留出足够空地。
+
+| 脚本 | 用途 |
+| --- | --- |
+| `tools/cmd_timeout_test.py` | 发送一段 `/cmd_vel` 后停发，测量小车多久停下 |
+| `tools/speed_step_test.py` | 速度阶跃响应：t90、超调、噪声峰值、稳态误差，保存为 CSV |
+| `tools/summarize_steps.py` | 汇总多次阶跃测试，对比不同参数组合（离线运行，不需要 ROS） |
+| `tools/odom_drive_test.py` | 按里程计直行一段距离或转若干圈，同时输出 IMU 航向，用来和卷尺实测对比 |
+| `tools/motor_characterization.py` | 开环测量 PWM 与轮速的关系，需要诊断版固件（`sdkconfig.motor_characterization`） |
 
 ## 运动安全
 
