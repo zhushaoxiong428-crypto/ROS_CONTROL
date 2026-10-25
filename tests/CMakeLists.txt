@@ -30,3 +30,7 @@ add_test(NAME agent_discovery COMMAND agent_discovery_test)
 add_executable(cycle_timing_stats_test cycle_timing_stats_test.cpp)
 target_include_directories(cycle_timing_stats_test PRIVATE ${FIRMWARE_DIR}/control)
 add_test(NAME cycle_timing_stats COMMAND cycle_timing_stats_test)
+
+add_executable(pwm_output_test pwm_output_test.cpp)
+target_include_directories(pwm_output_test PRIVATE ${FIRMWARE_DIR}/control)
+add_test(NAME pwm_output COMMAND pwm_output_test)

@@ -19,7 +19,7 @@ class MotionController {
   MotionController(At8236Motor& left_motor, At8236Motor& right_motor,
                    QuadratureEncoder& left_encoder, QuadratureEncoder& right_encoder);
                    
-  int16_t ApplyDeadband(float target_vel, float pid_output);
+  float ApplyDeadband(float target_vel, float pid_output);
   void SetMaxAcceleration(float accel_mms2);
   void MoveToPosition(float target_x, float target_y, float target_yaw);
   void MoveRelative(float distance_mm, float angle_deg);
@@ -60,7 +60,7 @@ class MotionController {
   float final_target_vel_[kNumWheels] = {0};
   int32_t last_count_[kNumWheels] = {0};
   float filtered_rpm_[kNumWheels] = {0};
-  int16_t open_loop_pwm_[kNumWheels] = {0};
+  float open_loop_pwm_[kNumWheels] = {0};
 
   ControlMode control_mode_ = ControlMode::kVelocity;
 

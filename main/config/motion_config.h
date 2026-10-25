@@ -24,6 +24,8 @@ static constexpr float kDefaultPositionKd = 0.5f;
 static constexpr float kDefaultYawKp = 2.5f;
 static constexpr float kDefaultYawKi = 0.0f;
 static constexpr float kDefaultYawKd = 0.5f;
+// Motor command scale: 255 = full duty. Commands are floats, quantized by the
+// 10-bit motor PWM (see control/pwm_output.h).
 static constexpr float kMaxPwm = 255.0f;
 static constexpr float kMotorPwmDeadband = 150.0f;
 static constexpr float kVelocityFilterAlpha = 0.35f;

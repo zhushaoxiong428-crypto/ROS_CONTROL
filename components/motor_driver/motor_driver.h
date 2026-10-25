@@ -10,7 +10,9 @@ class At8236Motor {
   At8236Motor(gpio_num_t in1_pin, gpio_num_t in2_pin);
 
   void Init();
-  void SetSpeed(int16_t speed);
+  // Signed duty in [-1, 1]: positive drives IN1, negative IN2, 0 coasts.
+  // Quantized by the 10-bit LEDC timer (1024 steps per direction).
+  void SetDuty(float duty);
   void Brake();
 
  private:

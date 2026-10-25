@@ -2,6 +2,7 @@
 
 #include "motion_controller.h"
 #include "motion_config.h"
+#include "pwm_output.h"
 #include "esp_log.h"
 #include <algorithm>
 #include <cmath>
@@ -120,12 +121,8 @@ void MotionController::Drive(float linear_x, float linear_y, float angular_z) {
   CalculateKinematics(linear_x, linear_y, angular_z);
 }
 
-int16_t MotionController::ApplyDeadband(float target_vel, float pid_output) {
-  if (std::abs(target_vel) > 0.1f && std::abs(pid_output) > 0.1f) {
-    float out = pid_output + (pid_output > 0 ? motion_cfg::kMotorPwmDeadband : -motion_cfg::kMotorPwmDeadband);
-    return static_cast<int16_t>(std::clamp(out, -motion_cfg::kMaxPwm, motion_cfg::kMaxPwm));
-  }
-  return 0; 
+float MotionController::ApplyDeadband(float target_vel, float pid_output) {
+  return ApplyPwmDeadband(target_vel, pid_output, motion_cfg::kMotorPwmDeadband, motion_cfg::kMaxPwm);
 }
 
 void MotionController::Update(float dt, float current_imu_yaw_rad) {
@@ -226,7 +223,7 @@ void MotionController::Update(float dt, float current_imu_yaw_rad) {
   // 开环 PWM：跳过速度环和死区补偿，原样输出
   if (control_mode_ == ControlMode::kOpenLoopPwm) {
     for (int i = 0; i < kNumWheels; ++i) {
-      motors_[i]->SetSpeed(open_loop_pwm_[i]);
+      motors_[i]->SetDuty(open_loop_pwm_[i] / motion_cfg::kMaxPwm);
     }
     return;
   }
@@ -262,15 +259,15 @@ void MotionController::Update(float dt, float current_imu_yaw_rad) {
     if (std::abs(target_vel_[i]) < 0.1f) pid_vel_[i].Reset();
     
     float raw_pwm = pid_vel_[i].Calculate(target_vel_[i], filtered_rpm_[i], dt);
-    int16_t final_pwm = ApplyDeadband(target_vel_[i], raw_pwm);
+    float final_pwm = ApplyDeadband(target_vel_[i], raw_pwm);
     
 #if DEBUG_PID
     if (i == 0) {
-      ESP_LOGI(TAG, "Mode:%d Pos:(%.1f, %.1f) Yaw:%.2f PWM_L:%d",
+      ESP_LOGI(TAG, "Mode:%d Pos:(%.1f, %.1f) Yaw:%.2f PWM_L:%.1f",
                (int)control_mode_, pos_x_, pos_y_, odom_yaw_, final_pwm);
     }
 #endif
-    motors_[i]->SetSpeed(final_pwm);
+    motors_[i]->SetDuty(final_pwm / motion_cfg::kMaxPwm);
   }
 }
 
@@ -307,8 +304,7 @@ void MotionController::SetOpenLoopPwm(float left_pwm, float right_pwm) {
   control_mode_ = ControlMode::kOpenLoopPwm;
   const float pwm[kNumWheels] = {left_pwm, right_pwm};
   for (int i = 0; i < kNumWheels; ++i) {
-    open_loop_pwm_[i] = static_cast<int16_t>(
-        std::lround(std::clamp(pwm[i], -motion_cfg::kMaxPwm, motion_cfg::kMaxPwm)));
+    open_loop_pwm_[i] = std::clamp(pwm[i], -motion_cfg::kMaxPwm, motion_cfg::kMaxPwm);
     // Leaving open loop must not resume from stale PID state.
     pid_vel_[i].Reset();
     target_vel_[i] = 0.0f;

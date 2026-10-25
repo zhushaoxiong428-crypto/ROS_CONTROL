@@ -1,5 +1,11 @@
 #include "motor_driver.h"
 
+#include <algorithm>
+#include <cmath>
+
+// 10 位 PWM：占空比取值 0..1024，1024 为持续高电平 (LEDC 允许 duty = 2^bits)
+static constexpr uint32_t kFullDuty = 1u << 10;
+
 // 静态变量分配唯一的 LEDC 通道，S3 有 8 个通道 (LEDC_CHANNEL_0 ~ LEDC_CHANNEL_7)
 static ledc_channel_t next_ledc_channel = LEDC_CHANNEL_0;
 static bool is_ledc_timer_init = false;
@@ -21,11 +27,11 @@ void At8236Motor::Init() {
   if (!usable_) {
     return;
   }
-  // 只初始化一次定时器 (频率 5000Hz, 8位分辨率 0-255)
+  // 只初始化一次定时器 (20 kHz, 10 位分辨率)
   if (!is_ledc_timer_init) {
     ledc_timer_config_t ledc_timer = {};
     ledc_timer.speed_mode      = LEDC_LOW_SPEED_MODE;
-    ledc_timer.duty_resolution = LEDC_TIMER_8_BIT;
+    ledc_timer.duty_resolution = LEDC_TIMER_10_BIT;
     ledc_timer.timer_num       = LEDC_TIMER_0;
     ledc_timer.freq_hz         = 20000;
     ledc_timer.clk_cfg         = LEDC_AUTO_CLK;
@@ -52,13 +58,13 @@ void At8236Motor::Init() {
   initialized_ = true;
 }
 
-void At8236Motor::SetSpeed(int16_t speed) {
+void At8236Motor::SetDuty(float duty) {
   if (!initialized_) {
     return;
   }
 
-  if (speed > 255) speed = 255;
-  if (speed < -255) speed = -255;
+  const int32_t speed = static_cast<int32_t>(
+      std::lround(std::clamp(duty, -1.0f, 1.0f) * static_cast<float>(kFullDuty)));
 
   if (speed > 0) {
     // 正转：IN2 输出 0，IN1 输出 PWM
@@ -87,8 +93,8 @@ void At8236Motor::Brake() {
   }
 
   // AT8236 双高电平为刹车
-  ledc_set_duty(LEDC_LOW_SPEED_MODE, channel_in1_, 255);
+  ledc_set_duty(LEDC_LOW_SPEED_MODE, channel_in1_, kFullDuty);
   ledc_update_duty(LEDC_LOW_SPEED_MODE, channel_in1_);
-  ledc_set_duty(LEDC_LOW_SPEED_MODE, channel_in2_, 255);
+  ledc_set_duty(LEDC_LOW_SPEED_MODE, channel_in2_, kFullDuty);
   ledc_update_duty(LEDC_LOW_SPEED_MODE, channel_in2_);
 }
