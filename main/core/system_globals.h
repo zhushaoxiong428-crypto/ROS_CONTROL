@@ -5,6 +5,7 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
+#include "msg/motion_tuning_msg.h"
 #include "msg/pid_msg.h"
 
 enum class WifiCommMode : uint8_t {
@@ -50,11 +51,13 @@ struct AppQueues {
     QueueHandle_t servo_cmd = nullptr;
     QueueHandle_t speedpid_cmd = nullptr;
     QueueHandle_t positionpid_cmd = nullptr;
+    QueueHandle_t motion_tuning_cmd = nullptr;
 };
 
 struct ControlState {
     PidMsg speed_pid = {};
     PidMsg position_pid = {};
+    MotionTuningMsg motion_tuning = {};
 };
 
 class SystemGlobals {

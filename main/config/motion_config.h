@@ -37,6 +37,9 @@ static constexpr float kFfDeadbandPwm[kWheelCount] = {142.5f, 143.1f};
 static constexpr float kFfMmsPerPwm[kWheelCount] = {5.96f, 5.94f};
 static constexpr float kFfReferenceVoltageV = 7.87f;
 static constexpr float kFfPidCorrectionLimitPwm = 60.0f;
+// Velocity-mode speed target ramp (m/s^2), 0 = apply steps at once. Zero
+// commands still stop immediately.
+static constexpr float kDefaultVelocityAccelLimitMps2 = 0.0f;
 static constexpr float kVelocityFilterAlpha = 0.35f;
 static constexpr float kMaxPositionVelocityMmS = 250.0f;
 static constexpr float kMaxPositionYawRadS = 3.0f;

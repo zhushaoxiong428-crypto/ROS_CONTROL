@@ -13,6 +13,7 @@
 #include "freertos/queue.h"
 #include "freertos/task.h"
 #include "i2c_bus_lock.h"
+#include "motion_config.h"
 #include "pid_config.h"
 #include "msg/gamepad_msg.h"
 #include "msg/imu_msg.h"
@@ -165,6 +166,10 @@ static void create_runtime_queues(void) {
         xQueueOverwrite(system_globals().queues.speedpid_cmd, &system_globals().control.speed_pid);
     }
     system_globals().queues.positionpid_cmd = xQueueCreate(1, sizeof(PidMsg));
+    system_globals().queues.motion_tuning_cmd = xQueueCreate(1, sizeof(MotionTuningMsg));
+    system_globals().control.motion_tuning.feedforward = leap_config::motion::kUseSpeedFeedforward;
+    system_globals().control.motion_tuning.accel_limit_mps2 =
+        leap_config::motion::kDefaultVelocityAccelLimitMps2;
 }
 
 void app_runtime_startup(void) {

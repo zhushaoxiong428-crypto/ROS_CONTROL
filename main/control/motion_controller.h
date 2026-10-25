@@ -42,6 +42,10 @@ class MotionController {
   void SetVelocityPidGains(float kp, float ki, float kd);
   // Latest battery voltage for feedforward compensation; <= 0 disables it.
   void SetBatteryVoltage(float volts) { battery_v_ = volts; }
+  // Speed feedforward on/off (see kUseSpeedFeedforward); resets the speed PID.
+  void SetSpeedFeedforward(bool enabled);
+  // Velocity-mode target ramp in m/s^2; <= 0 applies steps at once.
+  void SetVelocityAccelLimit(float accel_mps2);
   // Drive both motors with raw PWM (-255..255), bypassing the speed PID.
   // For motor characterization only; Stop() or any other command ends it.
   void SetOpenLoopPwm(float left_pwm, float right_pwm);
@@ -63,6 +67,8 @@ class MotionController {
   int32_t last_count_[kNumWheels] = {0};
   float filtered_rpm_[kNumWheels] = {0};
   float battery_v_ = 0.0f;
+  bool use_feedforward_ = leap_config::motion::kUseSpeedFeedforward;
+  float velocity_accel_rpm_s_ = 0.0f;  // 0 = no ramp
   int16_t open_loop_pwm_[kNumWheels] = {0};
 
   ControlMode control_mode_ = ControlMode::kVelocity;

@@ -9,6 +9,7 @@
 #include "msg/imu_msg.h"
 #include "msg/lidar_msg.h"
 #include "msg/motion_msg.h"
+#include "msg/motion_tuning_msg.h"
 #include "msg/temperature_msg.h"
 #include "msg/ultrasonic_msg.h"
 
@@ -869,6 +870,50 @@ static esp_err_t camera_provision_post_handler(httpd_req_t *req) {
     return httpd_resp_send(req, response_json, HTTPD_RESP_USE_STRLEN);
 }
 
+// Runtime speed-loop options for experiments, not saved:
+//   POST /api/motion-tuning  feedforward=0|1&accel_mps2=<0..10>
+// A missing field keeps its current value; accel_mps2=0 turns the ramp off.
+static esp_err_t motion_tuning_post_handler(httpd_req_t *req) {
+    char body[128] = {0};
+    if (req->content_len <= 0 || req->content_len >= static_cast<int>(sizeof(body))) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "invalid payload");
+        return ESP_FAIL;
+    }
+    const int received = httpd_req_recv(req, body, req->content_len);
+    if (received <= 0 || system_globals().queues.motion_tuning_cmd == nullptr) {
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "read failed");
+        return ESP_FAIL;
+    }
+    body[received] = '\0';
+
+    MotionTuningMsg tuning = system_globals().control.motion_tuning;
+    char value[16] = {0};
+    if (extract_form_field(body, "feedforward", value, sizeof(value))) {
+        if (strcmp(value, "0") != 0 && strcmp(value, "1") != 0) {
+            httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "feedforward must be 0 or 1");
+            return ESP_FAIL;
+        }
+        tuning.feedforward = value[0] == '1';
+    }
+    if (extract_form_field(body, "accel_mps2", value, sizeof(value))) {
+        char *end = nullptr;
+        const float accel = strtof(value, &end);
+        if (end == value || *end != '\0' || !(accel >= 0.0f && accel <= 10.0f)) {
+            httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "accel_mps2 must be 0..10");
+            return ESP_FAIL;
+        }
+        tuning.accel_limit_mps2 = accel;
+    }
+    xQueueOverwrite(system_globals().queues.motion_tuning_cmd, &tuning);
+
+    char response[96];
+    snprintf(response, sizeof(response), "{\"ok\":true,\"feedforward\":%s,\"accel_mps2\":%.2f}",
+             tuning.feedforward ? "true" : "false", tuning.accel_limit_mps2);
+    httpd_resp_set_type(req, "application/json");
+    httpd_resp_sendstr(req, response);
+    return ESP_OK;
+}
+
 static esp_err_t runtime_config_post_handler(httpd_req_t *req) {
     if (req->content_len <= 0 || req->content_len >= 256) {
         httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "invalid payload");
@@ -1093,6 +1138,12 @@ void provision_portal_start(void) {
         .handler = runtime_config_post_handler,
         .user_ctx = NULL,
     };
+    httpd_uri_t uri_motion_tuning = {
+        .uri = "/api/motion-tuning",
+        .method = HTTP_POST,
+        .handler = motion_tuning_post_handler,
+        .user_ctx = NULL,
+    };
     httpd_uri_t uri_camera_provision = {
         .uri = "/api/camera/provision",
         .method = HTTP_POST,
@@ -1111,6 +1162,7 @@ void provision_portal_start(void) {
     httpd_register_uri_handler(server, &uri_status);
     httpd_register_uri_handler(server, &uri_provision);
     httpd_register_uri_handler(server, &uri_runtime_config);
+    httpd_register_uri_handler(server, &uri_motion_tuning);
     httpd_register_uri_handler(server, &uri_camera_provision);
     httpd_register_uri_handler(server, &uri_captive_all);
 

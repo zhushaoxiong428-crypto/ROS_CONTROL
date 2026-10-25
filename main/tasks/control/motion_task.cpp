@@ -46,6 +46,7 @@ void motion_task(void *p) {
     MotionMsg status_msg = {};
     PidMsg speed_msg;
     PidMsg position_msg;
+    MotionTuningMsg tuning_msg;
     
     ImuMsg imu_msg = {}; 
     BatteryMsg battery_msg = {};
@@ -138,6 +139,16 @@ void motion_task(void *p) {
                      speed_msg.kp, speed_msg.ki, speed_msg.kd);
         }
         
+        // 2b. 运行时速度环选项 (实验用，不保存)
+        if (system_globals().queues.motion_tuning_cmd != nullptr &&
+            xQueueReceive(system_globals().queues.motion_tuning_cmd, &tuning_msg, 0) == pdTRUE) {
+            robot.SetSpeedFeedforward(tuning_msg.feedforward);
+            robot.SetVelocityAccelLimit(tuning_msg.accel_limit_mps2);
+            system_globals().control.motion_tuning = tuning_msg;
+            ESP_LOGI(TAG, "Motion tuning: feedforward=%d accel_limit=%.2f m/s^2",
+                     tuning_msg.feedforward ? 1 : 0, tuning_msg.accel_limit_mps2);
+        }
+
         // 3. 接收 PID 指令 (位置环)
         if (xQueueReceive(system_globals().queues.positionpid_cmd, &position_msg, 0) == pdTRUE) {
             robot.SetPositionPidGains(position_msg.kp, position_msg.ki, position_msg.kd);

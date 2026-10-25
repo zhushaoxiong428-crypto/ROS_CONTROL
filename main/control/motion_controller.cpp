@@ -2,6 +2,7 @@
 
 #include "motion_controller.h"
 #include "motion_config.h"
+#include "velocity_ramp.h"
 #include "wheel_feedforward.h"
 #include "esp_log.h"
 #include <algorithm>
@@ -38,13 +39,23 @@ MotionController::MotionController(
       pid_pos_x_(PidMode::kPositional, motion_cfg::kDefaultPositionKp, motion_cfg::kDefaultPositionKi, motion_cfg::kDefaultPositionKd, -motion_cfg::kMaxPositionVelocityMmS, motion_cfg::kMaxPositionVelocityMmS),
       pid_pos_y_(PidMode::kPositional, motion_cfg::kDefaultPositionKp, motion_cfg::kDefaultPositionKi, motion_cfg::kDefaultPositionKd, -motion_cfg::kMaxPositionVelocityMmS, motion_cfg::kMaxPositionVelocityMmS),
       pid_pos_yaw_(PidMode::kPositional, motion_cfg::kDefaultYawKp, motion_cfg::kDefaultYawKi, motion_cfg::kDefaultYawKd, -motion_cfg::kMaxPositionYawRadS, motion_cfg::kMaxPositionYawRadS) {
-  if (motion_cfg::kUseSpeedFeedforward) {
-    // The PID only trims the feedforward; a tight limit also stops it winding
-    // up while the total command saturates.
-    for (int i = 0; i < kNumWheels; ++i) {
-      pid_vel_[i].SetOutputLimits(-motion_cfg::kFfPidCorrectionLimitPwm, motion_cfg::kFfPidCorrectionLimitPwm);
-    }
+  SetSpeedFeedforward(motion_cfg::kUseSpeedFeedforward);
+  SetVelocityAccelLimit(motion_cfg::kDefaultVelocityAccelLimitMps2);
+}
+
+void MotionController::SetSpeedFeedforward(bool enabled) {
+  use_feedforward_ = enabled;
+  // With feedforward the PID only trims it; a tight limit also stops it
+  // winding up while the total command saturates.
+  const float limit = enabled ? motion_cfg::kFfPidCorrectionLimitPwm : motion_cfg::kMaxPwm;
+  for (int i = 0; i < kNumWheels; ++i) {
+    pid_vel_[i].SetOutputLimits(-limit, limit);
+    pid_vel_[i].Reset();
   }
+}
+
+void MotionController::SetVelocityAccelLimit(float accel_mps2) {
+  velocity_accel_rpm_s_ = accel_mps2 > 0.0f ? accel_mps2 * 1000.0f * motion_cfg::kMmSToRpm : 0.0f;
 }
 
 void MotionController::SetMaxAcceleration(float accel_mms2) { max_accel_rpm_s_ = accel_mms2 * motion_cfg::kMmSToRpm; }
@@ -264,6 +275,8 @@ void MotionController::Update(float dt, float current_imu_yaw_rad) {
       } else {
         target_vel_[i] = final_target_vel_[i];
       }
+    } else if (control_mode_ == ControlMode::kVelocity && velocity_accel_rpm_s_ > 0.0f) {
+      target_vel_[i] = RampToward(target_vel_[i], final_target_vel_[i], velocity_accel_rpm_s_ * dt);
     } else {
       target_vel_[i] = final_target_vel_[i];
     }
@@ -272,7 +285,7 @@ void MotionController::Update(float dt, float current_imu_yaw_rad) {
     
     float raw_pwm = pid_vel_[i].Calculate(target_vel_[i], filtered_rpm_[i], dt);
     int16_t final_pwm = 0;
-    if (motion_cfg::kUseSpeedFeedforward) {
+    if (use_feedforward_) {
       const WheelFeedforward ff = {motion_cfg::kFfDeadbandPwm[i], motion_cfg::kFfMmsPerPwm[i],
                                    motion_cfg::kFfReferenceVoltageV};
       const float ff_pwm = FeedforwardPwm(target_vel_[i] * motion_cfg::kRpmToMmS, ff, battery_v_,
