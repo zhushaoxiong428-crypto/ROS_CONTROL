@@ -17,6 +17,15 @@ constexpr uint8_t kRegCtrl2G   = 0x11;
 constexpr uint8_t kRegCtrl3C   = 0x12;
 constexpr uint8_t kRegOutxLG   = 0x22;
 
+// Z 轴灵敏度相对标称 8.75 mdps/LSB 偏大约 1.5%：地面上原地左右转各 8 s，
+// 以已标定的里程计为基准两次测得 1.0116 / 1.0183 (data/imu_heading_20261024)。
+// 这是本板的标定值，换板需重测 (tools/imu_heading_test.py)。
+constexpr float kGyroZScale = 1.015f;
+// 静止时零偏跟踪：时间常数、停稳等待、超过该角速度视为被外力转动
+constexpr float kBiasTimeConstantS = 2.0f;
+constexpr float kBiasSettleS = 0.5f;
+constexpr float kMaxStillRateDps = 1.0f;
+
 Lsm6ds3Imu::Lsm6ds3Imu(i2c_port_t port, gpio_num_t sda_pin, gpio_num_t scl_pin)
     : port_(port), sda_pin_(sda_pin), scl_pin_(scl_pin),
       acc_x_(0.0f), acc_y_(0.0f), acc_z_(0.0f),
@@ -24,7 +33,9 @@ Lsm6ds3Imu::Lsm6ds3Imu(i2c_port_t port, gpio_num_t sda_pin, gpio_num_t scl_pin)
       roll_(0.0f), pitch_(0.0f), yaw_(0.0f),
       q_w_(1.0f), q_x_(0.0f), q_y_(0.0f), q_z_(0.0f),
       last_us_(0),
-      gyro_bias_x_(0.0f), gyro_bias_y_(0.0f), gyro_bias_z_(0.0f) { // 初始化零偏
+      gyro_bias_x_(0.0f), gyro_bias_y_(0.0f), gyro_bias_z_(0.0f), // 初始化零偏
+      yaw_bias_(0.0f, kBiasTimeConstantS, kBiasSettleS, kMaxStillRateDps),
+      wheels_still_(false) {
 }
 
 // ---------------- 新增：陀螺仪静态校准函数 ----------------
@@ -51,6 +62,7 @@ void Lsm6ds3Imu::CalibrateGyro() {
   gyro_bias_x_ = sum_gx / kSamples;
   gyro_bias_y_ = sum_gy / kSamples;
   gyro_bias_z_ = sum_gz / kSamples;
+  yaw_bias_.Reset(gyro_bias_z_);
 
   ESP_LOGI(TAG, "Calibration Done! Bias: X=%.3f, Y=%.3f, Z=%.3f", 
            gyro_bias_x_, gyro_bias_y_, gyro_bias_z_);
@@ -116,25 +128,26 @@ esp_err_t Lsm6ds3Imu::Update() {
   int16_t ay = (buffer[9] << 8) | buffer[8];
   int16_t az = (buffer[11] << 8) | buffer[10];
 
+  // 获取积分时间 dt
+  uint64_t now = esp_timer_get_time();
+  float dt = (now - last_us_) / 1000000.0f;
+  last_us_ = now;
+
   // 【重要修改】：转换为物理单位 (±250dps -> 8.75mdps/LSB) 并减去校准零偏
   gyro_x_ = (gx * 8.75f / 1000.0f) - gyro_bias_x_;  
   gyro_y_ = (gy * 8.75f / 1000.0f) - gyro_bias_y_;
-  gyro_z_ = (gz * 8.75f / 1000.0f) - gyro_bias_z_;
+  // Z 轴零偏随温度漂移，静止时在线跟踪；行驶中不再用死区，否则慢速转弯
+  // 的真实角速度 (< 0.2 dps) 会被吞掉
+  gyro_z_ = yaw_bias_.Update(gz * 8.75f / 1000.0f, wheels_still_, dt) / kGyroZScale;
 
   // 【重要修改】：引入死区，如果角速度极小 (<0.2 dps)，则视为未旋转，防止底噪被积分
   constexpr float kGyroDeadzone = 0.2f; 
   if (std::abs(gyro_x_) < kGyroDeadzone) gyro_x_ = 0.0f;
   if (std::abs(gyro_y_) < kGyroDeadzone) gyro_y_ = 0.0f;
-  if (std::abs(gyro_z_) < kGyroDeadzone) gyro_z_ = 0.0f;
 
   acc_x_  = ax * 0.061f / 1000.0f; // ±2g -> 0.061 mg/LSB
   acc_y_  = ay * 0.061f / 1000.0f;
   acc_z_  = az * 0.061f / 1000.0f;
-
-  // 获取积分时间 dt
-  uint64_t now = esp_timer_get_time();
-  float dt = (now - last_us_) / 1000000.0f;
-  last_us_ = now;
 
   // 通过加速度计计算静态倾角 (弧度转角度)
   float roll_acc  = std::atan2(acc_y_, std::sqrt(acc_x_ * acc_x_ + acc_z_ * acc_z_)) * 57.29578f;

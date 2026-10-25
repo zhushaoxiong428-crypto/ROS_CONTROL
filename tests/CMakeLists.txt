@@ -38,3 +38,7 @@ add_test(NAME wheel_feedforward COMMAND wheel_feedforward_test)
 add_executable(velocity_ramp_test velocity_ramp_test.cpp)
 target_include_directories(velocity_ramp_test PRIVATE ${FIRMWARE_DIR}/control)
 add_test(NAME velocity_ramp COMMAND velocity_ramp_test)
+
+add_executable(gyro_bias_tracker_test gyro_bias_tracker_test.cpp)
+target_include_directories(gyro_bias_tracker_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../components/lsm6ds3_driver)
+add_test(NAME gyro_bias_tracker COMMAND gyro_bias_tracker_test)

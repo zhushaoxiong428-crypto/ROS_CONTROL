@@ -1,14 +1,25 @@
 #include "system_globals.h"
 #include "board.h" // 假设 imu 实例在此声明
 #include "msg/imu_msg.h"
+#include "msg/motion_msg.h"
+
+#include <cmath>
 
 #include "esp_log.h" // 确保包含了日志打印头文件
 
 void imu_task(void *p) {
     ImuMsg msg;
+    MotionMsg motion = {};
+    // 两轮速度都低于该值 (mm/s) 视为静止，用于陀螺仪零偏跟踪
+    constexpr float kStillWheelSpeedMms = 1.0f;
     uint8_t print_counter = 0; // 【新增】用于降低串口打印频率的计数器
 
     while (1) {
+        if (system_globals().queues.motion_state != nullptr &&
+            xQueuePeek(system_globals().queues.motion_state, &motion, 0) == pdTRUE) {
+            imu.SetWheelsStill(std::fabs(motion.vel_left) < kStillWheelSpeedMms &&
+                               std::fabs(motion.vel_right) < kStillWheelSpeedMms);
+        }
         imu.Update();
         imu.GetQuaternion(msg.qw, msg.qx, msg.qy, msg.qz);
         msg.roll = imu.GetRoll();

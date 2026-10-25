@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "driver/i2c.h"
+#include "gyro_bias_tracker.h"
 #include "driver/gpio.h"
 #include "esp_err.h"
 
@@ -14,8 +15,12 @@ class Lsm6ds3Imu {
   // 初始化 IMU 并配置 I2C (修改点：内部会自动执行上电零偏校准)
   bool Init();
 
-  // 读取传感器数据并执行互补滤波更新姿态 (修改点：内部增加了零偏补偿和死区)
+  // 读取传感器数据并执行互补滤波更新姿态 (Z 轴零偏在静止时持续跟踪)
   esp_err_t Update();
+
+  // 编码器报告两轮静止时为 true；用于在线跟踪 Z 轴零偏并冻结航向
+  void SetWheelsStill(bool still) { wheels_still_ = still; }
+  float GetGyroBiasZ() const { return yaw_bias_.bias_dps(); }
   
   // 一次性获取四元数 (w, x, y, z)
   void GetQuaternion(float &w, float &x, float &y, float &z) const {
@@ -50,6 +55,8 @@ class Lsm6ds3Imu {
   float gyro_bias_x_;
   float gyro_bias_y_;
   float gyro_bias_z_;
+  GyroBiasTracker yaw_bias_;
+  bool wheels_still_;
   void CalibrateGyro();
   // -----------------------------------------------------
 
