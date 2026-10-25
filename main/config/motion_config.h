@@ -32,7 +32,11 @@ static constexpr float kMotorPwmDeadband = 150.0f;
 // both directions alike, battery 7.87 V mean). With it on, the PID only
 // corrects around the feedforward, limited to +/-kFfPidCorrectionLimitPwm,
 // and the fixed deadband offset above is not used.
-static constexpr bool kUseSpeedFeedforward = true;
+// Off by default: on the ground, feedforward plus the best PID retune
+// overshoots 8-11 % at <= 0.1 m/s against ~4 % for the PID alone, which is
+// at the noise floor (data/feedforward_20261024, data/velocity_ramp_20261024).
+// It can be switched on at runtime via POST /api/motion-tuning.
+static constexpr bool kUseSpeedFeedforward = false;
 static constexpr float kFfDeadbandPwm[kWheelCount] = {142.5f, 143.1f};
 static constexpr float kFfMmsPerPwm[kWheelCount] = {5.96f, 5.94f};
 static constexpr float kFfReferenceVoltageV = 7.87f;
