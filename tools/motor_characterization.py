@@ -10,7 +10,9 @@ reads /cmd_vel linear.z / angular.x as raw left / right motor PWM:
 
 For each PWM level both wheels are driven forward, stopped, then driven in
 reverse, so the robot ends near where it started; the largest excursion is
-one hold at the highest level. Wheel speeds come from /odom:
+one hold at the highest level. The sweep stops after the first level where
+a wheel exceeds --max-speed, which bounds that excursion to roughly
+max speed x hold time. Wheel speeds come from /odom:
 v_left = vx - wz * W / 2, v_right = vx + wz * W / 2 (W = track width).
 
 Reports, per wheel and direction, the lowest PWM that moves the wheel from
@@ -102,6 +104,8 @@ def main():
     parser.add_argument("--rate", type=float, default=20.0, help="publish rate in Hz")
     parser.add_argument("--track-width", type=float, default=0.1317, help="metres, kTrackWidthMm / 1000")
     parser.add_argument("--moving", type=float, default=0.01, help="|v| above this counts as moving (m/s)")
+    parser.add_argument("--max-speed", type=float, default=0.4,
+                        help="stop raising PWM once a wheel's steady |v| exceeds this (m/s)")
     parser.add_argument("--csv", help="per-level results")
     parser.add_argument("--samples-csv", help="every odom sample")
     args = parser.parse_args()
@@ -116,6 +120,7 @@ def main():
             print("no /odom received; is the robot connected to the agent?", file=sys.stderr)
             return 2
         for pwm in levels:
+            level_peak = 0.0
             for sign in (1, -1):
                 node.hold(0, 0, args.rest_s, args.rate)
                 node.samples.clear()
@@ -127,9 +132,13 @@ def main():
                 v_left = statistics.fmean(s[1] for s in steady) if steady else float("nan")
                 v_right = statistics.fmean(s[2] for s in steady) if steady else float("nan")
                 results.append((sign * pwm, v_left, v_right, node.voltage))
+                level_peak = max(level_peak, abs(v_left), abs(v_right))
                 raw += [(sign * pwm, f"{t - t0:.4f}", f"{vl:.5f}", f"{vr:.5f}") for t, vl, vr in samples]
                 print(f"pwm {sign * pwm:+4d}: left {v_left:+.3f} m/s, right {v_right:+.3f} m/s, "
                       f"battery {node.voltage:.2f} V")
+            if level_peak > args.max_speed:
+                print(f"stopping the sweep: {level_peak:.3f} m/s exceeds --max-speed {args.max_speed}")
+                break
     finally:
         for _ in range(3):
             node.send_stop()
