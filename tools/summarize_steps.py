@@ -3,7 +3,9 @@
 
 Files are grouped by name with a trailing _r<N> run suffix removed, so
 kp1.2_ki6.0_r1.csv and kp1.2_ki6.0_r2.csv form one group. For each group
-it prints per-target mean overshoot, steady-state error, ripple and t90, and
+it prints per-target mean overshoot (peak before the steady window), the
+steady-state noise peak it should be read against, steady-state error,
+ripple and t90, and
 a score line used to pick PID gains:
 
   ok     every target has |steady error| < --max-ss-error and t90 < --max-t90
@@ -57,15 +59,16 @@ def main():
     for name, runs in sorted(groups.items()):
         targets = sorted(runs[0], key=lambda t: (abs(t), -t))
         print(f"== {name} ({len(runs)} run{'s' if len(runs) > 1 else ''})")
-        print(f"{'target':>8} {'overshoot':>10} {'ss error':>9} {'ripple':>7} {'t90 ms':>7}")
+        print(f"{'target':>8} {'overshoot':>10} {'noise pk':>9} {'ss error':>9} {'ripple':>7} {'t90 ms':>7}")
         ok = True
         for target in targets:
             os_ = mean([r[target]["overshoot_pct"] for r in runs])
             ss = mean([r[target]["ss_error_pct"] for r in runs])
             rip = mean([r[target]["ripple_pct"] for r in runs])
+            noise = mean([r[target]["noise_pct"] for r in runs])
             t90 = mean([r[target]["t90_ms"] for r in runs])
             ok &= abs(ss) < args.max_ss_error and not math.isnan(t90) and t90 < args.max_t90
-            print(f"{target:>+8.2f} {os_:>9.1f}% {ss:>+8.1f}% {rip:>6.1f}% {t90:>7.0f}")
+            print(f"{target:>+8.2f} {os_:>9.1f}% {noise:>8.1f}% {ss:>+8.1f}% {rip:>6.1f}% {t90:>7.0f}")
         low_os = mean([r[t]["overshoot_pct"] for r in runs for t in targets if abs(t) <= args.low_speed])
         scores.append((not ok, low_os, name))
         print(f"   ok={ok} low_os={low_os:.1f}%")

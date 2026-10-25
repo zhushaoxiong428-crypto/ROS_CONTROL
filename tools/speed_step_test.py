@@ -85,9 +85,9 @@ def main():
         node.destroy_node()
         rclpy.shutdown()
 
-    print(f"{'target m/s':>10} {'t90 ms':>8} {'rise ms':>8} {'overshoot':>10} {'ss error':>9} {'ripple':>8}")
+    print(f"{'target m/s':>10} {'t90 ms':>8} {'rise ms':>8} {'overshoot':>10} {'noise pk':>9} {'ss error':>9} {'ripple':>8}")
     for r in results:
-        print(f"{r['target']:>10.3f} {r['t90_ms']:>8.0f} {r['rise_ms']:>8.0f} {r['overshoot_pct']:>9.1f}% "
+        print(f"{r['target']:>10.3f} {r['t90_ms']:>8.0f} {r['rise_ms']:>8.0f} {r['overshoot_pct']:>9.1f}% {r['noise_pct']:>8.1f}% "
               f"{r['ss_error_pct']:>+8.1f}% {r['ripple_pct']:>7.1f}%")
     if args.csv:
         with open(args.csv, "w", newline="") as f:
