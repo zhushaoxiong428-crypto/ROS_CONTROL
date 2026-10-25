@@ -4,6 +4,7 @@
 #include "msg/motion_msg.h"
 #include "msg/pid_msg.h"
 #include "msg/imu_msg.h"  
+#include "msg/battery_msg.h"
 #include "command_watchdog.h"
 #include "cycle_timing_stats.h"
 #include "esp_log.h"
@@ -47,6 +48,7 @@ void motion_task(void *p) {
     PidMsg position_msg;
     
     ImuMsg imu_msg = {}; 
+    BatteryMsg battery_msg = {};
 
     int current_mode = 0;
     bool was_gamepad_override_active = false;
@@ -88,6 +90,10 @@ void motion_task(void *p) {
         const float dt = ClampLoopDtS(period_us, nominal_period_us);
         const uint32_t now_ms = pdTICKS_TO_MS(xTaskGetTickCount());
         xQueuePeek(system_globals().queues.imu_state, &imu_msg, 0);
+        if (system_globals().queues.battery_state != nullptr &&
+            xQueuePeek(system_globals().queues.battery_state, &battery_msg, 0) == pdTRUE) {
+            robot.SetBatteryVoltage(battery_msg.valid ? battery_msg.voltage_v : 0.0f);
+        }
                  
         // 1. 接收底层运动指令 (指令状态机)
         const bool nav_cmd_received = xQueueReceive(system_globals().queues.motion_cmd, &incoming_msg, 0) == pdTRUE;

@@ -3,6 +3,7 @@
 #include "motion_controller.h"
 #include "motion_config.h"
 #include "pwm_output.h"
+#include "wheel_feedforward.h"
 #include "esp_log.h"
 #include <algorithm>
 #include <cmath>
@@ -37,7 +38,15 @@ MotionController::MotionController(
       },
       pid_pos_x_(PidMode::kPositional, motion_cfg::kDefaultPositionKp, motion_cfg::kDefaultPositionKi, motion_cfg::kDefaultPositionKd, -motion_cfg::kMaxPositionVelocityMmS, motion_cfg::kMaxPositionVelocityMmS),
       pid_pos_y_(PidMode::kPositional, motion_cfg::kDefaultPositionKp, motion_cfg::kDefaultPositionKi, motion_cfg::kDefaultPositionKd, -motion_cfg::kMaxPositionVelocityMmS, motion_cfg::kMaxPositionVelocityMmS),
-      pid_pos_yaw_(PidMode::kPositional, motion_cfg::kDefaultYawKp, motion_cfg::kDefaultYawKi, motion_cfg::kDefaultYawKd, -motion_cfg::kMaxPositionYawRadS, motion_cfg::kMaxPositionYawRadS) {}
+      pid_pos_yaw_(PidMode::kPositional, motion_cfg::kDefaultYawKp, motion_cfg::kDefaultYawKi, motion_cfg::kDefaultYawKd, -motion_cfg::kMaxPositionYawRadS, motion_cfg::kMaxPositionYawRadS) {
+  if (motion_cfg::kUseSpeedFeedforward) {
+    // The PID only trims the feedforward; a tight limit also stops it winding
+    // up while the total command saturates.
+    for (int i = 0; i < kNumWheels; ++i) {
+      pid_vel_[i].SetOutputLimits(-motion_cfg::kFfPidCorrectionLimitPwm, motion_cfg::kFfPidCorrectionLimitPwm);
+    }
+  }
+}
 
 void MotionController::SetMaxAcceleration(float accel_mms2) { max_accel_rpm_s_ = accel_mms2 * motion_cfg::kMmSToRpm; }
 
@@ -259,7 +268,18 @@ void MotionController::Update(float dt, float current_imu_yaw_rad) {
     if (std::abs(target_vel_[i]) < 0.1f) pid_vel_[i].Reset();
     
     float raw_pwm = pid_vel_[i].Calculate(target_vel_[i], filtered_rpm_[i], dt);
-    float final_pwm = ApplyDeadband(target_vel_[i], raw_pwm);
+    float final_pwm = 0.0f;
+    if (motion_cfg::kUseSpeedFeedforward) {
+      const WheelFeedforward ff = {motion_cfg::kFfDeadbandPwm[i], motion_cfg::kFfMmsPerPwm[i],
+                                   motion_cfg::kFfReferenceVoltageV};
+      const float ff_pwm = FeedforwardPwm(target_vel_[i] * motion_cfg::kRpmToMmS, ff, battery_v_,
+                                          motion_cfg::kMaxPwm);
+      if (ff_pwm != 0.0f) {
+        final_pwm = std::clamp(ff_pwm + raw_pwm, -motion_cfg::kMaxPwm, motion_cfg::kMaxPwm);
+      }
+    } else {
+      final_pwm = ApplyDeadband(target_vel_[i], raw_pwm);
+    }
     
 #if DEBUG_PID
     if (i == 0) {

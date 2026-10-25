@@ -34,3 +34,7 @@ add_test(NAME cycle_timing_stats COMMAND cycle_timing_stats_test)
 add_executable(pwm_output_test pwm_output_test.cpp)
 target_include_directories(pwm_output_test PRIVATE ${FIRMWARE_DIR}/control)
 add_test(NAME pwm_output COMMAND pwm_output_test)
+
+add_executable(wheel_feedforward_test wheel_feedforward_test.cpp)
+target_include_directories(wheel_feedforward_test PRIVATE ${FIRMWARE_DIR}/control)
+add_test(NAME wheel_feedforward COMMAND wheel_feedforward_test)
