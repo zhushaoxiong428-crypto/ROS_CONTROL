@@ -16,7 +16,10 @@ max speed x hold time. Wheel speeds come from /odom:
 v_left = vx - wz * W / 2, v_right = vx + wz * W / 2 (W = track width).
 
 Reports, per wheel and direction, the lowest PWM that moves the wheel from
-rest and a line v = k * (pwm - p0) fitted above it.
+rest and a line v = k * (pwm - p0) fitted from there up to --fit-max-pwm.
+The curve bends down at high PWM, so fitting the whole range underestimates
+the slope where the robot is actually driven; near the deadband the wheel
+also needs well over a second to settle, hence the 2 s default hold.
 
 Usage:
   source /opt/ros/humble/setup.bash
@@ -98,12 +101,14 @@ def fit_line(points):
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--levels", default=DEFAULT_LEVELS, help="comma-separated PWM magnitudes")
-    parser.add_argument("--hold-s", type=float, default=1.2, help="time at each PWM")
+    parser.add_argument("--hold-s", type=float, default=2.0, help="time at each PWM")
     parser.add_argument("--steady-s", type=float, default=0.5, help="window at the end of each hold")
     parser.add_argument("--rest-s", type=float, default=0.6, help="stop between holds")
     parser.add_argument("--rate", type=float, default=20.0, help="publish rate in Hz")
     parser.add_argument("--track-width", type=float, default=0.1317, help="metres, kTrackWidthMm / 1000")
     parser.add_argument("--moving", type=float, default=0.01, help="|v| above this counts as moving (m/s)")
+    parser.add_argument("--fit-max-pwm", type=int, default=200,
+                        help="highest PWM used for the line fit (~0.34 m/s)")
     parser.add_argument("--max-speed", type=float, default=0.4,
                         help="stop raising PWM once a wheel's steady |v| exceeds this (m/s)")
     parser.add_argument("--csv", help="per-level results")
@@ -155,9 +160,9 @@ def main():
         for direction, sign in (("fwd", 1), ("rev", -1)):
             rows = sorted((abs(r[0]), sign * r[col]) for r in results if r[0] * sign > 0)
             start = next((p for p, v in rows if v > args.moving), None)
-            k, p0 = fit_line([(p, v) for p, v in rows if v > args.moving])
+            k, p0 = fit_line([(p, v) for p, v in rows if v > args.moving and p <= args.fit_max_pwm])
             print(f"{wheel:<6} {direction:<4} {str(start):>9}  {k:>15.5f}  {p0:>5.1f}  "
-                  f"{sum(1 for _, v in rows if v > args.moving)}")
+                  f"{sum(1 for p, v in rows if v > args.moving and p <= args.fit_max_pwm)}")
 
     if args.csv:
         with open(args.csv, "w", newline="") as f:

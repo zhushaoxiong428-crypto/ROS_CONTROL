@@ -26,15 +26,16 @@ static constexpr float kDefaultYawKi = 0.0f;
 static constexpr float kDefaultYawKd = 0.5f;
 static constexpr float kMaxPwm = 255.0f;
 static constexpr float kMotorPwmDeadband = 150.0f;
-// Speed feedforward from the ground open-loop curve v = k * (pwm - p0)
-// (data/motor_characterization_20261024, both directions alike, battery
-// 7.93 V mean). With it on, the PID only corrects around the feedforward,
-// limited to +/-kFfPidCorrectionLimitPwm, and the fixed deadband offset
-// above is not used.
+// Speed feedforward from the ground open-loop curve v = k * (pwm - p0),
+// fitted over PWM 150-200 (0-0.34 m/s, the range the robot is driven in)
+// with 2 s holds on warm motors (data/motor_characterization_20261024_warm,
+// both directions alike, battery 7.87 V mean). With it on, the PID only
+// corrects around the feedforward, limited to +/-kFfPidCorrectionLimitPwm,
+// and the fixed deadband offset above is not used.
 static constexpr bool kUseSpeedFeedforward = true;
-static constexpr float kFfDeadbandPwm[kWheelCount] = {142.7f, 142.0f};
-static constexpr float kFfMmsPerPwm[kWheelCount] = {5.67f, 5.57f};
-static constexpr float kFfReferenceVoltageV = 7.93f;
+static constexpr float kFfDeadbandPwm[kWheelCount] = {142.5f, 143.1f};
+static constexpr float kFfMmsPerPwm[kWheelCount] = {5.96f, 5.94f};
+static constexpr float kFfReferenceVoltageV = 7.87f;
 static constexpr float kFfPidCorrectionLimitPwm = 60.0f;
 static constexpr float kVelocityFilterAlpha = 0.35f;
 static constexpr float kMaxPositionVelocityMmS = 250.0f;
