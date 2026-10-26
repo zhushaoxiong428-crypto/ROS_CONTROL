@@ -1,0 +1,8 @@
+topic           count  rate Hz  median ms   p99 ms  max gap ms
+odom             1996    49.92       20.1     41.5        63.0
+imu              1924    48.10       20.2     49.7        66.4
+scan              367     9.17      101.0    207.9       300.9
+battery_state     400    10.00       99.9    120.0       150.8
+ultrasonic        400    10.00      100.0    119.0       150.7
+window 40.0 s
+arrivals written to data/rt_analysis_20261025/rates_moving_fixed.csv

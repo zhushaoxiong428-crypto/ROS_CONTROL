@@ -31,6 +31,11 @@ static constexpr const char kHostInfoTopic[] = "host_info";
 static constexpr const char kSetSpeedPidService[] = "set_speed_pid";
 static constexpr const char kGetSpeedPidService[] = "get_speed_pid";
 static constexpr uint32_t kPublishPeriodMs = 20;
+// Longest wait per spin. Waits are rounded to the 10 ms FreeRTOS tick; with
+// a wait as long as the publish period, an iteration often ran past the
+// timer's next due time and rcl skipped that period (odom 34 Hz, gaps of 20
+// and 40 ms). A short wait services the timer within one tick.
+static constexpr int kSpinTimeoutMs = 5;
 static constexpr uint32_t kSlowPublishDivider = 5;
 static constexpr float kScanTimeS = 0.1f;
 static constexpr float kLaserRangeMinM = 0.02f;

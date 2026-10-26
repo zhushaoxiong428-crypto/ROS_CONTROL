@@ -464,7 +464,7 @@ void microros_runtime_loop(void) {
                     continue;
                 }
             }
-            if (!spin_once(ros_cfg::kPublishPeriodMs)) {
+            if (!spin_once(ros_cfg::kSpinTimeoutMs)) {
                 ESP_LOGW(kTag, "micro-ROS transport stopped; recreating session");
                 destroy_ros_entities();
                 vTaskDelay(pdMS_TO_TICKS(1000));

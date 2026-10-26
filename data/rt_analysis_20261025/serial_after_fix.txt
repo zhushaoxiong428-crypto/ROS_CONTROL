@@ -1,0 +1,242 @@
+I (73562) MOTION_TASK: control loop (20 ms) n=500 period mean=20.000 std=0.096 min=19.275 max=20.727 ms |jitter|max=0.727 ms busy mean=0.351 max=0.654 ms overruns=0
+I (78952) RT_STATS: window 10.1 s  core0 load 42.9%  core1 load 7.1%  heap free 46 KiB (min 36 KiB)  tasks 20
+I (78952) RT_STATS:   IDLE1            prio  0  core 1    cpu  92.91%  stack_free   696 B
+I (78962) RT_STATS:   IDLE0            prio  0  core 0    cpu  57.15%  stack_free   592 B
+I (78962) RT_STATS:   microros         prio  4  core 0    cpu  28.21%  stack_free  7220 B
+I (78972) RT_STATS:   wifi             prio 23  core 0    cpu   6.33%  stack_free  3444 B
+I (78972) RT_STATS:   tiT              prio 18  core any  cpu   5.65%  stack_free  1888 B
+I (78972) RT_STATS:   imu              prio  5  core 1    cpu   3.68%  stack_free  2720 B
+I (78982) RT_STATS:   lidar            prio  4  core 1    cpu   2.16%  stack_free  5380 B
+I (78982) RT_STATS:   motion           prio  5  core 0    cpu   1.98%  stack_free  1136 B
+I (78992) RT_STATS:   rt_stats         prio  1  core 1    cpu   0.76%  stack_free  1548 B
+I (78992) RT_STATS:   gamepad_i2c      prio  4  core any  cpu   0.60%  stack_free  2940 B
+I (78992) RT_STATS:   battery          prio  4  core 0    cpu   0.28%  stack_free  1976 B
+I (79002) RT_STATS:   peripheral       prio  3  core 0    cpu   0.15%  stack_free  1972 B
+I (79002) RT_STATS:   ultrasonic       prio  4  core 1    cpu   0.13%  stack_free  3276 B
+I (79012) RT_STATS:   camera_task      prio  3  core any  cpu   0.04%  stack_free  1932 B
+I (79012) RT_STATS:   ipc1             prio 24  core 1    cpu   0.04%  stack_free   536 B
+I (79012) RT_STATS:   esp_timer        prio 22  core 0    cpu   0.01%  stack_free  3088 B
+I (79022) RT_STATS:   ipc0             prio 24  core 0    cpu   0.00%  stack_free   528 B
+I (79022) RT_STATS:   Tmr Svc          prio  1  core any  cpu   0.00%  stack_free  1312 B
+I (79022) RT_STATS:   httpd            prio  5  core any  cpu   0.00%  stack_free 11076 B
+I (79032) RT_STATS:   sys_evt          prio 20  core 0    cpu   0.00%  stack_free   600 B
+I (83582) MOTION_TASK: control loop (20 ms) n=500 period mean=20.000 std=0.105 min=19.286 max=20.715 ms |jitter|max=0.715 ms busy mean=0.350 max=0.873 ms overruns=0
+I (89032) RT_STATS: window 10.1 s  core0 load 43.2%  core1 load 7.1%  heap free 47 KiB (min 36 KiB)  tasks 20
+I (89032) RT_STATS:   IDLE1            prio  0  core 1    cpu  92.89%  stack_free   696 B
+I (89042) RT_STATS:   IDLE0            prio  0  core 0    cpu  56.77%  stack_free   592 B
+I (89042) RT_STATS:   microros         prio  4  core 0    cpu  28.47%  stack_free  7220 B
+I (89042) RT_STATS:   wifi             prio 23  core 0    cpu   6.37%  stack_free  3444 B
+I (89052) RT_STATS:   tiT              prio 18  core any  cpu   5.64%  stack_free  1888 B
+I (89052) RT_STATS:   imu              prio  5  core 1    cpu   3.69%  stack_free  2720 B
+I (89062) RT_STATS:   lidar            prio  4  core 1    cpu   2.15%  stack_free  5380 B
+I (89062) RT_STATS:   motion           prio  5  core 0    cpu   1.98%  stack_free  1136 B
+I (89062) RT_STATS:   rt_stats         prio  1  core 1    cpu   0.76%  stack_free  1548 B
+I (89072) RT_STATS:   gamepad_i2c      prio  4  core any  cpu   0.60%  stack_free  2940 B
+I (89072) RT_STATS:   battery          prio  4  core 0    cpu   0.26%  stack_free  1976 B
+I (89082) RT_STATS:   peripheral       prio  3  core 0    cpu   0.14%  stack_free  1972 B
+I (89082) RT_STATS:   ultrasonic       prio  4  core 1    cpu   0.13%  stack_free  3276 B
+I (89082) RT_STATS:   camera_task      prio  3  core any  cpu   0.04%  stack_free  1932 B
+I (89092) RT_STATS:   ipc1             prio 24  core 1    cpu   0.04%  stack_free   536 B
+I (89092) RT_STATS:   esp_timer        prio 22  core 0    cpu   0.01%  stack_free  3088 B
+I (89102) RT_STATS:   Tmr Svc          prio  1  core any  cpu   0.00%  stack_free  1312 B
+I (89102) RT_STATS:   httpd            prio  5  core any  cpu   0.00%  stack_free 11076 B
+I (89102) RT_STATS:   sys_evt          prio 20  core 0    cpu   0.00%  stack_free   600 B
+I (89112) RT_STATS:   ipc0             prio 24  core 0    cpu   0.00%  stack_free   528 B
+I (93602) MOTION_TASK: control loop (20 ms) n=500 period mean=20.000 std=0.099 min=19.310 max=20.690 ms |jitter|max=0.690 ms busy mean=0.348 max=0.656 ms overruns=0
+I (99112) RT_STATS: window 10.1 s  core0 load 43.0%  core1 load 7.0%  heap free 47 KiB (min 36 KiB)  tasks 20
+I (99112) RT_STATS:   IDLE1            prio  0  core 1    cpu  92.95%  stack_free   696 B
+I (99122) RT_STATS:   IDLE0            prio  0  core 0    cpu  57.02%  stack_free   592 B
+I (99122) RT_STATS:   microros         prio  4  core 0    cpu  28.25%  stack_free  7220 B
+I (99122) RT_STATS:   wifi             prio 23  core 0    cpu   6.38%  stack_free  3444 B
+I (99132) RT_STATS:   tiT              prio 18  core any  cpu   5.63%  stack_free  1888 B
+I (99132) RT_STATS:   imu              prio  5  core 1    cpu   3.69%  stack_free  2720 B
+I (99142) RT_STATS:   lidar            prio  4  core 1    cpu   2.13%  stack_free  5380 B
+I (99142) RT_STATS:   motion           prio  5  core 0    cpu   1.97%  stack_free  1136 B
+I (99142) RT_STATS:   rt_stats         prio  1  core 1    cpu   0.76%  stack_free  1548 B
+I (99152) RT_STATS:   gamepad_i2c      prio  4  core any  cpu   0.60%  stack_free  2940 B
+I (99152) RT_STATS:   battery          prio  4  core 0    cpu   0.27%  stack_free  1976 B
+I (99162) RT_STATS:   peripheral       prio  3  core 0    cpu   0.14%  stack_free  1972 B
+I (99162) RT_STATS:   ultrasonic       prio  4  core 1    cpu   0.13%  stack_free  3276 B
+I (99162) RT_STATS:   ipc1             prio 24  core 1    cpu   0.04%  stack_free   536 B
+I (99172) RT_STATS:   camera_task      prio  3  core any  cpu   0.02%  stack_free  1932 B
+I (99172) RT_STATS:   esp_timer        prio 22  core 0    cpu   0.01%  stack_free  3088 B
+I (99182) RT_STATS:   httpd            prio  5  core any  cpu   0.00%  stack_free 11076 B
+I (99182) RT_STATS:   sys_evt          prio 20  core 0    cpu   0.00%  stack_free   600 B
+I (99182) RT_STATS:   ipc0             prio 24  core 0    cpu   0.00%  stack_free   528 B
+I (99192) RT_STATS:   Tmr Svc          prio  1  core any  cpu   0.00%  stack_free  1312 B
+I (103622) MOTION_TASK: control loop (20 ms) n=500 period mean=20.000 std=0.085 min=19.425 max=20.576 ms |jitter|max=0.576 ms busy mean=0.347 max=0.650 ms overruns=0
+I (109192) RT_STATS: window 10.1 s  core0 load 43.2%  core1 load 7.1%  heap free 47 KiB (min 36 KiB)  tasks 20
+I (109192) RT_STATS:   IDLE1            prio  0  core 1    cpu  92.93%  stack_free   696 B
+I (109202) RT_STATS:   IDLE0            prio  0  core 0    cpu  56.80%  stack_free   592 B
+I (109202) RT_STATS:   microros         prio  4  core 0    cpu  28.37%  stack_free  7220 B
+I (109212) RT_STATS:   wifi             prio 23  core 0    cpu   6.43%  stack_free  3444 B
+I (109212) RT_STATS:   tiT              prio 18  core any  cpu   5.69%  stack_free  1888 B
+I (109212) RT_STATS:   imu              prio  5  core 1    cpu   3.69%  stack_free  2720 B
+I (109222) RT_STATS:   lidar            prio  4  core 1    cpu   2.15%  stack_free  5380 B
+I (109222) RT_STATS:   motion           prio  5  core 0    cpu   1.98%  stack_free  1136 B
+I (109222) RT_STATS:   rt_stats         prio  1  core 1    cpu   0.75%  stack_free  1548 B
+I (109232) RT_STATS:   gamepad_i2c      prio  4  core any  cpu   0.60%  stack_free  2940 B
+I (109232) RT_STATS:   battery          prio  4  core 0    cpu   0.27%  stack_free  1976 B
+I (109242) RT_STATS:   peripheral       prio  3  core 0    cpu   0.14%  stack_free  1972 B
+I (109242) RT_STATS:   ultrasonic       prio  4  core 1    cpu   0.13%  stack_free  3276 B
+I (109242) RT_STATS:   ipc1             prio 24  core 1    cpu   0.04%  stack_free   536 B
+I (109252) RT_STATS:   camera_task      prio  3  core any  cpu   0.03%  stack_free  1932 B
+I (109252) RT_STATS:   esp_timer        prio 22  core 0    cpu   0.01%  stack_free  3088 B
+I (109262) RT_STATS:   sys_evt          prio 20  core 0    cpu   0.00%  stack_free   600 B
+I (109262) RT_STATS:   ipc0             prio 24  core 0    cpu   0.00%  stack_free   528 B
+I (109262) RT_STATS:   Tmr Svc          prio  1  core any  cpu   0.00%  stack_free  1312 B
+I (109272) RT_STATS:   httpd            prio  5  core any  cpu   0.00%  stack_free 11076 B
+I (113642) MOTION_TASK: control loop (20 ms) n=500 period mean=20.000 std=0.095 min=19.261 max=20.743 ms |jitter|max=0.743 ms busy mean=0.347 max=0.700 ms overruns=0
+I (119272) RT_STATS: window 10.1 s  core0 load 42.6%  core1 load 6.8%  heap free 47 KiB (min 36 KiB)  tasks 20
+I (119272) RT_STATS:   IDLE1            prio  0  core 1    cpu  93.17%  stack_free   696 B
+I (119282) RT_STATS:   IDLE0            prio  0  core 0    cpu  57.36%  stack_free   592 B
+I (119282) RT_STATS:   microros         prio  4  core 0    cpu  28.21%  stack_free  7220 B
+I (119282) RT_STATS:   wifi             prio 23  core 0    cpu   6.18%  stack_free  3444 B
+I (119292) RT_STATS:   tiT              prio 18  core any  cpu   5.56%  stack_free  1888 B
+I (119292) RT_STATS:   imu              prio  5  core 1    cpu   3.58%  stack_free  2720 B
+I (119302) RT_STATS:   lidar            prio  4  core 1    cpu   2.09%  stack_free  5380 B
+I (119302) RT_STATS:   motion           prio  5  core 0    cpu   1.96%  stack_free  1136 B
+I (119302) RT_STATS:   rt_stats         prio  1  core 1    cpu   0.76%  stack_free  1548 B
+I (119312) RT_STATS:   gamepad_i2c      prio  4  core any  cpu   0.59%  stack_free  2940 B
+I (119312) RT_STATS:   battery          prio  4  core 0    cpu   0.26%  stack_free  1976 B
+I (119322) RT_STATS:   peripheral       prio  3  core 0    cpu   0.14%  stack_free  1972 B
+I (119322) RT_STATS:   ultrasonic       prio  4  core 1    cpu   0.11%  stack_free  3276 B
+I (119322) RT_STATS:   ipc1             prio 24  core 1    cpu   0.04%  stack_free   536 B
+I (119332) RT_STATS:   camera_task      prio  3  core any  cpu   0.02%  stack_free  1932 B
+I (119332) RT_STATS:   esp_timer        prio 22  core 0    cpu   0.01%  stack_free  3088 B
+I (119342) RT_STATS:   ipc0             prio 24  core 0    cpu   0.00%  stack_free   528 B
+I (119342) RT_STATS:   Tmr Svc          prio  1  core any  cpu   0.00%  stack_free  1312 B
+I (119342) RT_STATS:   httpd            prio  5  core any  cpu   0.00%  stack_free 11076 B
+I (119352) RT_STATS:   sys_evt          prio 20  core 0    cpu   0.00%  stack_free   600 B
+I (123662) MOTION_TASK: control loop (20 ms) n=500 period mean=20.000 std=0.074 min=19.390 max=20.611 ms |jitter|max=0.611 ms busy mean=0.345 max=0.703 ms overruns=0
+I (129352) RT_STATS: window 10.1 s  core0 load 42.4%  core1 load 6.8%  heap free 47 KiB (min 36 KiB)  tasks 20
+I (129352) RT_STATS:   IDLE1            prio  0  core 1    cpu  93.25%  stack_free   696 B
+I (129362) RT_STATS:   IDLE0            prio  0  core 0    cpu  57.56%  stack_free   592 B
+I (129362) RT_STATS:   microros         prio  4  core 0    cpu  28.05%  stack_free  7220 B
+I (129372) RT_STATS:   wifi             prio 23  core 0    cpu   6.10%  stack_free  3444 B
+I (129372) RT_STATS:   tiT              prio 18  core any  cpu   5.52%  stack_free  1888 B
+I (129372) RT_STATS:   imu              prio  5  core 1    cpu   3.53%  stack_free  2720 B
+I (129382) RT_STATS:   lidar            prio  4  core 1    cpu   2.05%  stack_free  5380 B
+I (129382) RT_STATS:   motion           prio  5  core 0    cpu   1.96%  stack_free  1136 B
+I (129382) RT_STATS:   rt_stats         prio  1  core 1    cpu   0.77%  stack_free  1532 B
+I (129392) RT_STATS:   gamepad_i2c      prio  4  core any  cpu   0.58%  stack_free  2940 B
+I (129392) RT_STATS:   battery          prio  4  core 0    cpu   0.27%  stack_free  1976 B
+I (129402) RT_STATS:   peripheral       prio  3  core 0    cpu   0.14%  stack_free  1972 B
+I (129402) RT_STATS:   ultrasonic       prio  4  core 1    cpu   0.10%  stack_free  3276 B
+I (129402) RT_STATS:   ipc1             prio 24  core 1    cpu   0.04%  stack_free   536 B
+I (129412) RT_STATS:   camera_task      prio  3  core any  cpu   0.02%  stack_free  1932 B
+I (129412) RT_STATS:   esp_timer        prio 22  core 0    cpu   0.01%  stack_free  3088 B
+I (129422) RT_STATS:   Tmr Svc          prio  1  core any  cpu   0.00%  stack_free  1312 B
+I (129422) RT_STATS:   httpd            prio  5  core any  cpu   0.00%  stack_free 11076 B
+I (129422) RT_STATS:   sys_evt          prio 20  core 0    cpu   0.00%  stack_free   600 B
+I (129432) RT_STATS:   ipc0             prio 24  core 0    cpu   0.00%  stack_free   528 B
+I (133682) MOTION_TASK: control loop (20 ms) n=500 period mean=20.000 std=0.106 min=19.304 max=20.697 ms |jitter|max=0.697 ms busy mean=0.364 max=0.988 ms overruns=0
+I (139432) RT_STATS: window 10.1 s  core0 load 45.1%  core1 load 7.6%  heap free 48 KiB (min 36 KiB)  tasks 20
+I (139432) RT_STATS:   IDLE1            prio  0  core 1    cpu  92.44%  stack_free   696 B
+I (139442) RT_STATS:   IDLE0            prio  0  core 0    cpu  54.91%  stack_free   592 B
+I (139442) RT_STATS:   microros         prio  4  core 0    cpu  29.74%  stack_free  7220 B
+I (139452) RT_STATS:   wifi             prio 23  core 0    cpu   6.80%  stack_free  3444 B
+I (139452) RT_STATS:   tiT              prio 18  core any  cpu   6.34%  stack_free  1888 B
+I (139452) RT_STATS:   imu              prio  5  core 1    cpu   3.51%  stack_free  2720 B
+I (139462) RT_STATS:   motion           prio  5  core 0    cpu   2.25%  stack_free  1136 B
+I (139462) RT_STATS:   lidar            prio  4  core 1    cpu   2.11%  stack_free  5380 B
+I (139472) RT_STATS:   rt_stats         prio  1  core 1    cpu   0.77%  stack_free  1532 B
+I (139472) RT_STATS:   gamepad_i2c      prio  4  core any  cpu   0.60%  stack_free  2940 B
+I (139472) RT_STATS:   battery          prio  4  core 0    cpu   0.26%  stack_free  1976 B
+I (139482) RT_STATS:   peripheral       prio  3  core 0    cpu   0.14%  stack_free  1972 B
+I (139482) RT_STATS:   ultrasonic       prio  4  core 1    cpu   0.11%  stack_free  3276 B
+I (139492) RT_STATS:   ipc1             prio 24  core 1    cpu   0.04%  stack_free   536 B
+I (139492) RT_STATS:   camera_task      prio  3  core any  cpu   0.03%  stack_free  1932 B
+I (139492) RT_STATS:   esp_timer        prio 22  core 0    cpu   0.01%  stack_free  3088 B
+I (139502) RT_STATS:   httpd            prio  5  core any  cpu   0.00%  stack_free 11076 B
+I (139502) RT_STATS:   sys_evt          prio 20  core 0    cpu   0.00%  stack_free   600 B
+I (139512) RT_STATS:   ipc0             prio 24  core 0    cpu   0.00%  stack_free   528 B
+I (139512) RT_STATS:   Tmr Svc          prio  1  core any  cpu   0.00%  stack_free  1312 B
+I (143702) MOTION_TASK: control loop (20 ms) n=500 period mean=20.000 std=0.178 min=18.625 max=21.374 ms |jitter|max=1.375 ms busy mean=0.422 max=1.385 ms overruns=0
+I (149512) RT_STATS: window 10.1 s  core0 load 45.4%  core1 load 7.7%  heap free 47 KiB (min 36 KiB)  tasks 20
+I (149512) RT_STATS:   IDLE1            prio  0  core 1    cpu  92.27%  stack_free   696 B
+I (149512) RT_STATS:   IDLE0            prio  0  core 0    cpu  54.58%  stack_free   592 B
+I (149522) RT_STATS:   microros         prio  4  core 0    cpu  30.00%  stack_free  7220 B
+I (149522) RT_STATS:   wifi             prio 23  core 0    cpu   6.75%  stack_free  3444 B
+I (149522) RT_STATS:   tiT              prio 18  core any  cpu   6.43%  stack_free  1888 B
+I (149532) RT_STATS:   imu              prio  5  core 1    cpu   3.56%  stack_free  2720 B
+I (149532) RT_STATS:   motion           prio  5  core 0    cpu   2.30%  stack_free  1136 B
+I (149542) RT_STATS:   lidar            prio  4  core 1    cpu   2.12%  stack_free  5380 B
+I (149542) RT_STATS:   rt_stats         prio  1  core 1    cpu   0.76%  stack_free  1532 B
+I (149542) RT_STATS:   gamepad_i2c      prio  4  core any  cpu   0.61%  stack_free  2940 B
+I (149552) RT_STATS:   battery          prio  4  core 0    cpu   0.28%  stack_free  1976 B
+I (149552) RT_STATS:   peripheral       prio  3  core 0    cpu   0.15%  stack_free  1972 B
+I (149562) RT_STATS:   ultrasonic       prio  4  core 1    cpu   0.11%  stack_free  3276 B
+I (149562) RT_STATS:   ipc1             prio 24  core 1    cpu   0.04%  stack_free   536 B
+I (149562) RT_STATS:   camera_task      prio  3  core any  cpu   0.03%  stack_free  1932 B
+I (149572) RT_STATS:   esp_timer        prio 22  core 0    cpu   0.01%  stack_free  3088 B
+I (149572) RT_STATS:   sys_evt          prio 20  core 0    cpu   0.00%  stack_free   600 B
+I (149582) RT_STATS:   ipc0             prio 24  core 0    cpu   0.00%  stack_free   528 B
+I (149582) RT_STATS:   Tmr Svc          prio  1  core any  cpu   0.00%  stack_free  1312 B
+I (149582) RT_STATS:   httpd            prio  5  core any  cpu   0.00%  stack_free 11076 B
+I (153722) MOTION_TASK: control loop (20 ms) n=500 period mean=20.000 std=0.109 min=19.248 max=20.749 ms |jitter|max=0.752 ms busy mean=0.426 max=1.296 ms overruns=0
+I (159592) RT_STATS: window 10.1 s  core0 load 45.7%  core1 load 7.7%  heap free 47 KiB (min 36 KiB)  tasks 20
+I (159592) RT_STATS:   IDLE1            prio  0  core 1    cpu  92.30%  stack_free   696 B
+I (159602) RT_STATS:   IDLE0            prio  0  core 0    cpu  54.33%  stack_free   592 B
+I (159602) RT_STATS:   microros         prio  4  core 0    cpu  30.21%  stack_free  7220 B
+I (159612) RT_STATS:   wifi             prio 23  core 0    cpu   6.80%  stack_free  3444 B
+I (159612) RT_STATS:   tiT              prio 18  core any  cpu   6.38%  stack_free  1888 B
+I (159612) RT_STATS:   imu              prio  5  core 1    cpu   3.56%  stack_free  2720 B
+I (159622) RT_STATS:   motion           prio  5  core 0    cpu   2.28%  stack_free  1136 B
+I (159622) RT_STATS:   lidar            prio  4  core 1    cpu   2.16%  stack_free  5380 B
+I (159632) RT_STATS:   rt_stats         prio  1  core 1    cpu   0.76%  stack_free  1532 B
+I (159632) RT_STATS:   gamepad_i2c      prio  4  core any  cpu   0.61%  stack_free  2940 B
+I (159632) RT_STATS:   battery          prio  4  core 0    cpu   0.26%  stack_free  1976 B
+I (159642) RT_STATS:   peripheral       prio  3  core 0    cpu   0.14%  stack_free  1972 B
+I (159642) RT_STATS:   ultrasonic       prio  4  core 1    cpu   0.11%  stack_free  3276 B
+I (159642) RT_STATS:   ipc1             prio 24  core 1    cpu   0.04%  stack_free   536 B
+I (159652) RT_STATS:   camera_task      prio  3  core any  cpu   0.03%  stack_free  1932 B
+I (159652) RT_STATS:   esp_timer        prio 22  core 0    cpu   0.01%  stack_free  3088 B
+I (159662) RT_STATS:   ipc0             prio 24  core 0    cpu   0.00%  stack_free   528 B
+I (159662) RT_STATS:   Tmr Svc          prio  1  core any  cpu   0.00%  stack_free  1312 B
+I (159662) RT_STATS:   httpd            prio  5  core any  cpu   0.00%  stack_free 11076 B
+I (159672) RT_STATS:   sys_evt          prio 20  core 0    cpu   0.00%  stack_free   600 B
+I (163742) MOTION_TASK: control loop (20 ms) n=500 period mean=20.000 std=0.125 min=19.147 max=20.852 ms |jitter|max=0.853 ms busy mean=0.384 max=0.760 ms overruns=0
+I (169672) RT_STATS: window 10.1 s  core0 load 42.7%  core1 load 6.7%  heap free 47 KiB (min 36 KiB)  tasks 20
+I (169672) RT_STATS:   IDLE1            prio  0  core 1    cpu  93.26%  stack_free   696 B
+I (169682) RT_STATS:   IDLE0            prio  0  core 0    cpu  57.31%  stack_free   592 B
+I (169682) RT_STATS:   microros         prio  4  core 0    cpu  28.20%  stack_free  7220 B
+I (169692) RT_STATS:   wifi             prio 23  core 0    cpu   6.14%  stack_free  3444 B
+I (169692) RT_STATS:   tiT              prio 18  core any  cpu   5.55%  stack_free  1888 B
+I (169692) RT_STATS:   imu              prio  5  core 1    cpu   3.48%  stack_free  2720 B
+I (169702) RT_STATS:   lidar            prio  4  core 1    cpu   2.05%  stack_free  5380 B
+I (169702) RT_STATS:   motion           prio  5  core 0    cpu   2.02%  stack_free  1136 B
+I (169702) RT_STATS:   rt_stats         prio  1  core 1    cpu   0.77%  stack_free  1532 B
+I (169712) RT_STATS:   gamepad_i2c      prio  4  core any  cpu   0.61%  stack_free  2940 B
+I (169712) RT_STATS:   battery          prio  4  core 0    cpu   0.26%  stack_free  1976 B
+I (169722) RT_STATS:   peripheral       prio  3  core 0    cpu   0.14%  stack_free  1972 B
+I (169722) RT_STATS:   ultrasonic       prio  4  core 1    cpu   0.10%  stack_free  3276 B
+I (169732) RT_STATS:   ipc1             prio 24  core 1    cpu   0.04%  stack_free   536 B
+I (169732) RT_STATS:   camera_task      prio  3  core any  cpu   0.03%  stack_free  1932 B
+I (169732) RT_STATS:   esp_timer        prio 22  core 0    cpu   0.01%  stack_free  3088 B
+I (169742) RT_STATS:   Tmr Svc          prio  1  core any  cpu   0.00%  stack_free  1312 B
+I (169742) RT_STATS:   httpd            prio  5  core any  cpu   0.00%  stack_free 11076 B
+I (169742) RT_STATS:   sys_evt          prio 20  core 0    cpu   0.00%  stack_free   600 B
+I (169752) RT_STATS:   ipc0             prio 24  core 0    cpu   0.00%  stack_free   528 B
+I (173762) MOTION_TASK: control loop (20 ms) n=500 period mean=20.000 std=0.107 min=19.242 max=20.758 ms |jitter|max=0.758 ms busy mean=0.357 max=0.802 ms overruns=0
+I (179752) RT_STATS: window 10.1 s  core0 load 42.7%  core1 load 6.7%  heap free 47 KiB (min 36 KiB)  tasks 20
+I (179752) RT_STATS:   IDLE1            prio  0  core 1    cpu  93.25%  stack_free   696 B
+I (179762) RT_STATS:   IDLE0            prio  0  core 0    cpu  57.28%  stack_free   592 B
+I (179762) RT_STATS:   microros         prio  4  core 0    cpu  28.28%  stack_free  7220 B
+I (179772) RT_STATS:   wifi             prio 23  core 0    cpu   6.18%  stack_free  3444 B
+I (179772) RT_STATS:   tiT              prio 18  core any  cpu   5.53%  stack_free  1888 B
+I (179772) RT_STATS:   imu              prio  5  core 1    cpu   3.49%  stack_free  2720 B
+I (179782) RT_STATS:   lidar            prio  4  core 1    cpu   2.05%  stack_free  5380 B
+I (179782) RT_STATS:   motion           prio  5  core 0    cpu   2.02%  stack_free  1136 B
+I (179792) RT_STATS:   rt_stats         prio  1  core 1    cpu   0.76%  stack_free  1532 B
+I (179792) RT_STATS:   gamepad_i2c      prio  4  core any  cpu   0.61%  stack_free  2940 B
+I (179792) RT_STATS:   battery          prio  4  core 0    cpu   0.26%  stack_free  1976 B
+I (179802) RT_STATS:   peripheral       prio  3  core 0    cpu   0.14%  stack_free  1972 B
+I (179802) RT_STATS:   ultrasonic       prio  4  core 1    cpu   0.10%  stack_free  3276 B
+I (179812) RT_STATS:   ipc1             prio 24  core 1    cpu   0.04%  stack_free   536 B
+I (179812) RT_STATS:   camera_task      prio  3  core any  cpu   0.03%  stack_free  1932 B
+I (179812) RT_STATS:   esp_timer        prio 22  core 0    cpu   0.01%  stack_free  3088 B
+I (179822) RT_STATS:   httpd            prio  5  core any  cpu   0.00%  stack_free 11076 B
+I (179822) RT_STATS:   sys_evt          prio 20  core 0    cpu   0.00%  stack_free   600 B
+I (179832) RT_STATS:   ipc0             prio 24  core 0    cpu   0.00%  stack_free   528 B
+I (179832) RT_STATS:   Tmr Svc          prio  1  core any  cpu   0.00%  stack_free  1312 B
