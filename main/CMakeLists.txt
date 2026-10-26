@@ -7,6 +7,7 @@ set(APP_SRCS
     "control/differential_kinematics.cpp"
     "control/motion_controller.cpp"
     "tasks/control/motion_task.cpp"
+    "tasks/diag/rt_stats_task.cpp"
     "tasks/sensors/imu_task.cpp"
     "tasks/sensors/ultrasonic_task.cpp"
     "tasks/sensors/battery_task.cpp"

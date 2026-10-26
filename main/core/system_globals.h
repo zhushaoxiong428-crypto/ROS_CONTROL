@@ -82,6 +82,7 @@ SystemGlobals& system_globals();
 
 // Task entry declarations.
 void motion_task(void *p);
+void rt_stats_task(void *p);
 void imu_task(void *p);
 void ultrasonic_task(void *p);
 void battery_task(void *p);

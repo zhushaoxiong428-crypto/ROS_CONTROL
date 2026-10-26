@@ -212,6 +212,8 @@ void app_runtime_startup(void) {
     }
     xTaskCreate(camera_task, "camera_task", 4096, NULL, 3, NULL);
     xTaskCreate(wifi_start_task, "wifi_start", 4096, NULL, 3, &s_wifi_start_task_handle);
+    // Diagnostics: core load, per-task CPU and stack headroom every 10 s.
+    xTaskCreate(rt_stats_task, "rt_stats", 4096, NULL, 1, NULL);
 
     s_runtime_started = true;
     ESP_LOGI(TAG, "Leap low runtime started");

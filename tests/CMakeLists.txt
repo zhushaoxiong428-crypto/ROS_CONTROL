@@ -42,3 +42,7 @@ add_test(NAME velocity_ramp COMMAND velocity_ramp_test)
 add_executable(gyro_bias_tracker_test gyro_bias_tracker_test.cpp)
 target_include_directories(gyro_bias_tracker_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../components/lsm6ds3_driver)
 add_test(NAME gyro_bias_tracker COMMAND gyro_bias_tracker_test)
+
+add_executable(runtime_stats_test runtime_stats_test.cpp)
+target_include_directories(runtime_stats_test PRIVATE ${FIRMWARE_DIR}/core)
+add_test(NAME runtime_stats COMMAND runtime_stats_test)
