@@ -17,11 +17,12 @@
 - **速度控制**：在地面上实测并重新调了速度 PID；另外试过前馈、10 位 PWM 和目标速度斜坡，实测都没有带来改善，所以默认不启用（见 [doc/speed_control.md](doc/speed_control.md)）。
 - **正确性与实时性**：编码器溢出改由 PCNT 驱动累加，并处理了驱动里的读数竞态；控制循环改用 `vTaskDelayUntil`、按实测周期计算 `dt`，并每 10 秒打印一次周期统计。
 - **IMU 航向**：陀螺仪 Z 轴零偏在静止时持续跟踪，并校正了灵敏度，静止时航向不再漂移（见下文“IMU 航向”）。
+- **实时性**：新增每 10 秒打印一次的任务级 CPU、栈余量和堆统计；修复了 micro-ROS 发布循环漏发整个周期的问题，`/odom` 从 34 Hz 恢复到 50 Hz（见 [doc/realtime.md](doc/realtime.md)）。
 - **实车测试工具**：`tools/` 下的脚本通过 ROS 话题驱动小车并记录数据，`data/` 下保存了每一组实测数据。
 
 ## 实测结果
 
-除注明“架空”的两项外，都是小车放在地上实测的数据，原始数据见各行链接。速度控制的完整过程，包括没有效果的尝试和中途修正过的测量错误，见 [doc/speed_control.md](doc/speed_control.md)。
+除注明“架空”的几项外，都是小车放在地上实测的数据，原始数据见各行链接。速度控制的完整过程，包括没有效果的尝试和中途修正过的测量错误，见 [doc/speed_control.md](doc/speed_control.md)。
 
 | 项目 | 改动前 | 现在 | 数据 |
 | --- | --- | --- | --- |
@@ -35,6 +36,8 @@
 | IMU 航向：静止 20 s 漂移 | 7.5–7.8° | 0.00° | [IMU 测试](data/imu_heading_20261024) |
 | IMU 航向：直行 8 s 与里程计之差 | 4.3–5.4° | 0.6–1.3° | 同上 |
 | micro-ROS Agent 连接 | 需要手动填写电脑 IP | Wi-Fi 连上后 0.12 s 自动找到 | — |
+| `/odom` 到达频率（架空，静止 / 运动） | 34.1 / 39.1 Hz，间隔为 20 和 40 ms 两种 | 50.0 / 49.9 Hz | [实时性测试](data/rt_analysis_20261025) |
+| 资源余量（架空） | 未测量 | 0 号核负载静止 42–43 %、运动 45–46 %，1 号核静止 7 %、运动 8 %；堆最低剩 36 KiB；应用任务栈最低剩 1136 B（`motion`） | 同上 |
 
 调参的取舍：在 `kp=1.2` 下，`ki=4` 比 `ki=6` 的低速超调低一半多，但 -0.2 m/s 的阶跃要慢约 100 ms（269 对 173 ms）。速度测量的分辨率也有上限：0.05 m/s 时，每个 20 ms 周期只有约 23 个编码器计数，1 个计数就相当于 4 % 的速度。
 
@@ -48,6 +51,7 @@
 
 - IMU 航向仍有残余误差：行驶中零偏约 0.2 °/s，静止时的跟踪管不到这部分；Z 轴灵敏度标定值 1.015 只适用于这块板子，修正后左右转合算仍有 0.5–1 % 的偏差；零偏是否在实际更新，只能从直行零偏变小间接判断，固件没有对外报告零偏值。
 - 急停锁存还没有在实车上验证；micro-ROS 侧也还不能触发急停，因为订阅名额已经用满。
+- 两个核负载不均衡：`microros`、Wi-Fi 和 lwIP 都在 0 号核上；`sdkconfig.defaults` 写的 tick 是 1000 Hz，而实际使用的 `sdkconfig` 是 100 Hz（见 [doc/realtime.md](doc/realtime.md#遗留问题)）。
 
 ## v2.1 更新内容
 
@@ -77,6 +81,7 @@ main/
 │   ├── ros_config.h                  # ROS 节点、话题、服务、frame、发布周期
 │   └── pid_config.h / pid_config.cpp # 速度 PID 的 NVS 读取和保存
 ├── core/system_globals.*             # flags / runtime / queues / control 共享状态
+├── core/runtime_stats.h              # 任务 CPU 统计的增量计算
 ├── platform/board.*                  # 硬件对象及初始化
 ├── control/
 │   ├── differential_kinematics.*     # 两轮差速正逆运动学，轮序为左、右
@@ -89,6 +94,7 @@ main/
 ├── msg/                              # 任务间消息
 └── tasks/
     ├── control/ / sensors/ / io/
+    ├── diag/rt_stats_task.cpp        # 每 10 秒打印核负载、各任务 CPU、栈余量和堆
     └── network/
         ├── microros/                 # task、runtime、state、transport、发布、订阅、服务
         ├── mavlink/                  # 共用协议处理、UDP 和 UART 任务
@@ -125,7 +131,7 @@ idf.py build
 
 固件为 `build/leap_ros.bin`，整包为 `build/merged-binary.bin`。
 
-不依赖硬件的逻辑有主机单元测试，包括差速运动学、指令超时、Agent 发现的子网计算、控制周期统计、速度前馈、斜坡和陀螺仪零偏跟踪，无需连接开发板：
+不依赖硬件的逻辑有主机单元测试，包括差速运动学、指令超时、Agent 发现的子网计算、控制周期统计、任务 CPU 统计、速度前馈、斜坡和陀螺仪零偏跟踪，无需连接开发板：
 
 ```bash
 cmake -S tests -B build-tests
@@ -147,6 +153,7 @@ ctest --test-dir build-tests --output-on-failure
 | `tools/odom_drive_test.py` | 按里程计直行一段距离或转若干圈，同时输出 IMU 航向，用来和卷尺实测对比 |
 | `tools/motor_characterization.py` | 开环测量 PWM 与轮速的关系，需要诊断版固件（`sdkconfig.motor_characterization`） |
 | `tools/imu_heading_test.py` | 依次静止、直行、左转、右转，对比陀螺仪和里程计的角速度，算出零偏和比例系数 |
+| `tools/topic_rates.py` | 在电脑上统计各话题的实际频率和到达间隔（p99、最大间隔），不驱动小车 |
 
 ## IMU 航向
 
