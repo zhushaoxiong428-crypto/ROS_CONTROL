@@ -1,0 +1,7 @@
+listening on /dev/ttyUSB0 at 921600 baud (listen only)
+odom  50.1 Hz [ 17.9/ 20.0/ 22.3 ms]  x=  1.647 y= -0.014 yaw=   -1.8 deg  vx= 0.000 wz=-0.000 | frames 274 lost 0 crc 0 hb 1
+odom  50.0 Hz [ 18.0/ 20.0/ 22.5 ms]  x=  1.647 y= -0.014 yaw=   -1.8 deg  vx= 0.000 wz=-0.000 | frames 549 lost 0 crc 0 hb 2
+odom  50.0 Hz [ 18.2/ 20.0/ 22.4 ms]  x=  1.647 y= -0.014 yaw=   -1.8 deg  vx= 0.000 wz=-0.000 | frames 824 lost 0 crc 0 hb 3
+odom  50.0 Hz [ 18.0/ 20.0/ 22.3 ms]  x=  1.647 y= -0.014 yaw=   -1.8 deg  vx= 0.000 wz=-0.000 | frames 1099 lost 0 crc 0 hb 4
+total: 4.0 s, 93237 bytes, frames 1099, lost 0, crc 0
+odom gaps: n 199  p50 19.9  p95 22.2  p99 22.4  max 22.5 ms

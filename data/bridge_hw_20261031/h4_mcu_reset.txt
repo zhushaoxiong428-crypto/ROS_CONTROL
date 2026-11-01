@@ -1,0 +1,45 @@
+listening on /dev/ttyUSB0 at 921600 baud, driving
+odom  50.1 Hz [ 17.6/ 20.0/ 22.5 ms]  x=  7.317 y=  0.073 yaw=    1.4 deg  vx= 0.106 wz=-0.031 | frames 275 lost 0 crc 0 hb 1
+odom  50.0 Hz [ 17.5/ 20.0/ 22.6 ms]  x=  7.420 y=  0.075 yaw=    0.3 deg  vx= 0.100 wz=-0.003 | frames 550 lost 0 crc 0 hb 2
+odom  50.0 Hz [ 17.7/ 20.0/ 22.6 ms]  x=  7.519 y=  0.076 yaw=    1.2 deg  vx= 0.103 wz=-0.049 | frames 825 lost 0 crc 0 hb 3
+odom  50.0 Hz [ 17.5/ 20.0/ 22.8 ms]  x=  7.618 y=  0.078 yaw=    1.4 deg  vx= 0.103 wz=-0.049 | frames 1100 lost 0 crc 0 hb 4
+odom  50.0 Hz [ 17.6/ 20.0/ 22.7 ms]  x=  7.718 y=  0.080 yaw=    1.6 deg  vx= 0.101 wz=-0.012 | frames 1375 lost 0 crc 0 hb 5
+odom  48.0 Hz [ 17.7/ 20.8/ 60.3 ms]  x=  7.819 y=  0.082 yaw=    1.0 deg  vx= 0.092 wz= 0.104 | frames 1645 lost 5 crc 2 hb 6
+odom  50.0 Hz [ 17.5/ 20.0/ 22.8 ms]  x=  7.918 y=  0.084 yaw=    1.5 deg  vx= 0.096 wz= 0.073 | frames 1920 lost 5 crc 2 hb 7
+odom  50.0 Hz [ 17.8/ 20.0/ 22.5 ms]  x=  8.019 y=  0.085 yaw=    1.2 deg  vx= 0.100 wz=-0.003 | frames 2195 lost 5 crc 2 hb 8
+odom  50.0 Hz [ 17.6/ 20.0/ 22.8 ms]  x=  8.119 y=  0.087 yaw=    0.9 deg  vx= 0.102 wz=-0.010 | frames 2470 lost 5 crc 2 hb 9
+odom  50.0 Hz [ 17.9/ 20.0/ 22.9 ms]  x=  8.219 y=  0.089 yaw=    0.9 deg  vx= 0.101 wz=-0.013 | frames 2745 lost 5 crc 2 hb 10
+odom  50.0 Hz [ 17.5/ 20.0/ 22.6 ms]  x=  8.319 y=  0.090 yaw=    0.5 deg  vx= 0.102 wz=-0.012 | frames 3020 lost 5 crc 2 hb 11
+odom  50.0 Hz [ 17.5/ 20.0/ 22.5 ms]  x=  8.419 y=  0.092 yaw=    0.6 deg  vx= 0.101 wz=-0.018 | frames 3295 lost 5 crc 2 hb 12
+odom  49.0 Hz [ 17.6/ 20.4/ 40.2 ms]  x=  8.519 y=  0.094 yaw=    0.7 deg  vx= 0.102 wz=-0.028 | frames 3568 lost 7 crc 3 hb 13
+odom  50.0 Hz [ 17.7/ 20.0/ 22.9 ms]  x=  8.619 y=  0.096 yaw=    1.5 deg  vx= 0.094 wz= 0.089 | frames 3843 lost 7 crc 3 hb 14
+odom  49.9 Hz [ 17.9/ 20.1/ 22.6 ms]  x=  8.693 y=  0.097 yaw=    1.2 deg  vx= 0.101 wz=-0.008 | frames 4044 lost 7 crc 3 hb 15
+odom  21.6 Hz [  3.8/ 46.4/721.8 ms]  x=  0.051 y= -0.000 yaw=   -0.4 deg  vx= 0.117 wz=-0.029 | frames 4206 lost 159 crc 8 hb 15
+odom  49.0 Hz [ 18.1/ 20.4/ 40.4 ms]  x=  0.154 y=  0.000 yaw=    0.1 deg  vx= 0.104 wz=-0.071 | frames 4480 lost 160 crc 9 hb 16
+odom  50.0 Hz [ 17.6/ 20.0/ 23.0 ms]  x=  0.255 y=  0.001 yaw=   -0.3 deg  vx= 0.095 wz= 0.083 | frames 4755 lost 160 crc 9 hb 17
+odom  50.0 Hz [ 18.2/ 20.0/ 22.7 ms]  x=  0.355 y=  0.001 yaw=   -0.1 deg  vx= 0.100 wz=-0.016 | frames 5030 lost 160 crc 9 hb 18
+odom  50.0 Hz [ 18.2/ 20.0/ 23.0 ms]  x=  0.455 y=  0.001 yaw=   -0.5 deg  vx= 0.102 wz=-0.023 | frames 5305 lost 160 crc 9 hb 19
+odom  50.0 Hz [ 17.0/ 20.0/ 24.8 ms]  x=  0.554 y=  0.001 yaw=    0.5 deg  vx= 0.097 wz= 0.044 | frames 5580 lost 160 crc 9 hb 20
+odom  50.0 Hz [ 18.2/ 20.0/ 22.1 ms]  x=  0.655 y=  0.000 yaw=   -0.3 deg  vx= 0.092 wz= 0.131 | frames 5855 lost 160 crc 9 hb 21
+odom  50.0 Hz [ 18.2/ 20.0/ 22.2 ms]  x=  0.755 y=  0.001 yaw=   -0.0 deg  vx= 0.102 wz=-0.053 | frames 6130 lost 160 crc 9 hb 22
+odom  50.0 Hz [ 18.2/ 20.0/ 22.2 ms]  x=  0.855 y=  0.000 yaw=   -0.5 deg  vx= 0.100 wz=-0.005 | frames 6405 lost 160 crc 9 hb 23
+odom  50.0 Hz [ 18.2/ 20.0/ 22.6 ms]  x=  0.955 y=  0.000 yaw=   -0.1 deg  vx= 0.102 wz=-0.034 | frames 6680 lost 160 crc 9 hb 24
+odom  50.0 Hz [ 18.1/ 20.0/ 22.1 ms]  x=  1.054 y= -0.000 yaw=    0.2 deg  vx= 0.104 wz=-0.053 | frames 6955 lost 160 crc 9 hb 25
+odom  49.9 Hz [ 18.2/ 20.0/ 22.2 ms]  x=  1.151 y= -0.001 yaw=   -0.6 deg  vx= 0.101 wz=-0.010 | frames 7210 lost 160 crc 9 hb 26
+odom   0.0 Hz [  0.0/  0.0/  0.0 ms]  x=  1.151 y= -0.001 yaw=   -0.6 deg  vx= 0.101 wz=-0.010 | frames 7210 lost 160 crc 9 hb 26
+odom   0.0 Hz [  0.0/  0.0/  0.0 ms]  x=  1.151 y= -0.001 yaw=   -0.6 deg  vx= 0.101 wz=-0.010 | frames 7210 lost 160 crc 9 hb 26
+odom   0.0 Hz [  0.0/  0.0/  0.0 ms]  x=  1.151 y= -0.001 yaw=   -0.6 deg  vx= 0.101 wz=-0.010 | frames 7210 lost 160 crc 9 hb 26
+no MAVLink frames for 3 s: is the robot in MAVLink UART mode, and is this its UART0 port?
+odom   4.0 Hz [  3.5/252.9/3755.2 ms]  x=  0.023 y= -0.000 yaw=   -0.1 deg  vx= 0.092 wz=-0.001 | frames 7301 lost 319 crc 12 hb 26
+odom  49.0 Hz [ 17.7/ 20.4/ 42.7 ms]  x=  0.129 y= -0.000 yaw=   -0.4 deg  vx= 0.103 wz=-0.020 | frames 7575 lost 320 crc 13 hb 27
+odom  49.0 Hz [ 17.8/ 20.4/ 42.0 ms]  x=  0.229 y= -0.001 yaw=   -0.6 deg  vx= 0.101 wz=-0.018 | frames 7848 lost 321 crc 14 hb 28
+odom  50.0 Hz [ 15.4/ 20.0/ 23.0 ms]  x=  0.328 y= -0.001 yaw=    0.1 deg  vx= 0.096 wz= 0.076 | frames 8120 lost 323 crc 16 hb 29
+odom  49.0 Hz [ 17.8/ 20.4/ 39.9 ms]  x=  0.429 y= -0.002 yaw=   -0.3 deg  vx= 0.092 wz= 0.113 | frames 8393 lost 325 crc 17 hb 30
+odom  50.0 Hz [ 17.8/ 20.0/ 23.3 ms]  x=  0.528 y= -0.002 yaw=    0.0 deg  vx= 0.094 wz= 0.096 | frames 8666 lost 327 crc 18 hb 31
+odom  50.0 Hz [ 17.6/ 20.0/ 23.0 ms]  x=  0.629 y= -0.002 yaw=   -0.7 deg  vx= 0.101 wz=-0.016 | frames 8941 lost 327 crc 18 hb 32
+odom  50.0 Hz [ 17.9/ 20.0/ 22.9 ms]  x=  0.729 y= -0.003 yaw=   -0.3 deg  vx= 0.090 wz= 0.154 | frames 9214 lost 329 crc 19 hb 33
+odom  49.0 Hz [ 17.8/ 20.4/ 39.8 ms]  x=  0.829 y= -0.004 yaw=   -0.6 deg  vx= 0.097 wz= 0.043 | frames 9487 lost 331 crc 20 hb 34
+odom  50.0 Hz [ 17.8/ 20.0/ 22.8 ms]  x=  0.928 y= -0.005 yaw=    0.1 deg  vx= 0.099 wz= 0.027 | frames 9762 lost 331 crc 20 hb 35
+total: 40.0 s, 890096 bytes, frames 9762, lost 331, crc 20
+odom gaps: n 1769  p50 20.0  p95 22.4  p99 23.3  max 3755.2 ms
+exit_code=0

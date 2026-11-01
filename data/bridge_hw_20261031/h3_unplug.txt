@@ -1,0 +1,17 @@
+listening on /dev/ttyUSB0 at 921600 baud, driving
+odom  50.1 Hz [ 17.2/ 20.0/ 22.6 ms]  x=  6.096 y=  0.036 yaw=    1.9 deg  vx= 0.097 wz= 0.108 | frames 275 lost 0 crc 0 hb 1
+odom  50.0 Hz [ 17.4/ 20.0/ 22.7 ms]  x=  6.197 y=  0.040 yaw=    2.1 deg  vx= 0.101 wz=-0.018 | frames 550 lost 0 crc 0 hb 2
+odom  50.0 Hz [ 17.1/ 20.0/ 22.6 ms]  x=  6.297 y=  0.043 yaw=    2.0 deg  vx= 0.104 wz=-0.060 | frames 825 lost 0 crc 0 hb 3
+odom  50.0 Hz [ 17.6/ 20.0/ 22.8 ms]  x=  6.397 y=  0.047 yaw=    1.6 deg  vx= 0.105 wz=-0.080 | frames 1100 lost 0 crc 0 hb 4
+odom  50.0 Hz [ 17.6/ 20.0/ 22.4 ms]  x=  6.497 y=  0.049 yaw=    1.6 deg  vx= 0.103 wz=-0.040 | frames 1375 lost 0 crc 0 hb 5
+odom  50.0 Hz [ 17.4/ 20.0/ 22.9 ms]  x=  6.597 y=  0.052 yaw=    1.8 deg  vx= 0.094 wz= 0.089 | frames 1650 lost 0 crc 0 hb 6
+odom  50.0 Hz [ 17.2/ 20.0/ 22.5 ms]  x=  6.698 y=  0.054 yaw=    1.4 deg  vx= 0.100 wz= 0.000 | frames 1925 lost 0 crc 0 hb 7
+odom  50.0 Hz [ 17.2/ 20.0/ 22.5 ms]  x=  6.797 y=  0.058 yaw=    1.9 deg  vx= 0.095 wz= 0.076 | frames 2200 lost 0 crc 0 hb 8
+odom  50.0 Hz [ 17.4/ 20.0/ 22.9 ms]  x=  6.897 y=  0.060 yaw=    1.4 deg  vx= 0.102 wz=-0.015 | frames 2475 lost 0 crc 0 hb 9
+odom  50.0 Hz [ 17.9/ 20.0/ 22.7 ms]  x=  6.997 y=  0.063 yaw=    1.8 deg  vx= 0.094 wz= 0.084 | frames 2750 lost 0 crc 0 hb 10
+odom  50.0 Hz [ 17.8/ 20.0/ 22.5 ms]  x=  7.097 y=  0.067 yaw=    2.1 deg  vx= 0.099 wz= 0.018 | frames 3025 lost 0 crc 0 hb 11
+/dev/ttyUSB0: device gone (unplugged?)
+failed to send stop: write: Input/output error
+total: 11.9 s, 276650 bytes, frames 3128, lost 0, crc 0
+odom gaps: n 568  p50 19.9  p95 22.5  p99 22.6  max 22.9 ms
+exit_code=1

@@ -1,0 +1,3 @@
+listening on /dev/ttyUSB0 at 921600 baud, driving
+odom  50.0 Hz [ 17.6/ 20.0/ 22.9 ms]  x=  1.384 y= -0.008 yaw=   -1.0 deg  vx= 0.106 wz=-0.060 | frames 275 lost 0 crc 0 hb 1
+odom  50.0 Hz [ 17.7/ 20.0/ 22.9 ms]  x=  1.484 y= -0.010 yaw=   -1.4 deg  vx= 0.101 wz=-0.018 | frames 550 lost 0 crc 0 hb 2

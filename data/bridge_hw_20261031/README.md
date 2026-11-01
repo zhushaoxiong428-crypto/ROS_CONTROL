@@ -23,6 +23,28 @@ written to UART0 by another task lands inside MAVLink frames. With those two rep
 skipped in the UART modes (`Uart0CarriesBinaryLink`), 3050 frames in 61 s arrived with
 no loss and no CRC error. Other, one-off log lines (warnings) still go to UART0.
 
+## Driving and faults (921600, periodic logs off), wheels lifted
+
+- **H2, drive 0.1 m/s for 60 s** (`h2_drive_lifted_0.1.*`): 3003 ODOMETRY frames at
+  50.00 Hz, 0 lost, 0 CRC errors, host gaps max 22.7 ms. Speed after 5 s: mean
+  0.1000 m/s, SD 0.0038, range 0.091–0.106. The zero command sent on exit took effect at
+  once (`h2_after_exit.*`: speed already falling in the first frame, ~0 within ~0.3 s), with
+  no 500 ms plateau of waiting for the watchdog.
+- **H3, USB unplugged while driving** (`h3_unplug.*`): 0 lost until the unplug at
+  11.4 s; the bridge saw EPOLLHUP, printed `device gone`, failed to send the stop command
+  (EIO, the cable was out) and exited with code 1. The wheels stopped by eye "almost at
+  once" (the watchdog's ~0.5 s); the MCU did not reset (uptime continuous).
+- **H4, MCU reset button pressed twice while driving** (`h4_mcu_reset.*`): the bridge
+  kept running through both reboots (warned after 3 s without frames) and resumed with
+  the first frame after each. **The robot started driving again on its own after each
+  reboot**, because the host keeps streaming commands and the firmware obeys them as
+  soon as it is up; after the second reboot it overshot to 0.139 m/s before settling at
+  0.1. The first reboot resumed publishing at firmware time 170 ms, without the 3 s IMU
+  calibration (the second took the normal 3.2 s): possibly the IMU failing to
+  initialize after a reset mid-I2C-transfer; not confirmed, no boot log was captured.
+  `lost` (331) is inflated: a reboot restarts the sequence number, which the bridge
+  counts as loss; the extra CRC errors are boot log printed at 230400 read at 921600.
+
 - `listen_idle_60s.csv/.txt`: 230400 baud
 - `listen_idle_60s_921600.csv/.txt`: 921600 baud, after the baud change
 - `listen_idle_60s_921600_nolog.csv/.txt`: 921600 baud, periodic log reports off
