@@ -1,0 +1,63 @@
+listening on /dev/ttyUSB0 at 230400 baud (listen only)
+odom  49.6 Hz [ 13.8/ 20.2/ 58.3 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 274 lost 0 crc 0 hb 1
+odom  48.7 Hz [ 13.8/ 20.5/ 76.4 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 547 lost 1 crc 1 hb 2
+odom  49.9 Hz [ 13.8/ 20.0/ 56.9 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 820 lost 1 crc 1 hb 3
+odom  50.1 Hz [ 13.9/ 20.0/ 55.6 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 1095 lost 1 crc 1 hb 4
+odom  50.2 Hz [ 13.9/ 19.9/ 52.8 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 1373 lost 1 crc 1 hb 5
+odom  50.1 Hz [ 13.9/ 19.9/ 56.9 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 1648 lost 1 crc 1 hb 6
+odom  43.8 Hz [ 13.8/ 22.9/113.9 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 1898 lost 2 crc 2 hb 7
+odom  50.0 Hz [ 13.8/ 20.0/ 77.8 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 2170 lost 2 crc 2 hb 8
+odom  50.1 Hz [ 13.8/ 19.9/ 77.8 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 2446 lost 2 crc 2 hb 9
+odom  49.9 Hz [ 13.8/ 20.1/ 76.4 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 2720 lost 2 crc 2 hb 10
+odom  49.8 Hz [ 13.8/ 20.1/ 77.8 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 2996 lost 2 crc 2 hb 11
+odom  48.1 Hz [ 13.9/ 20.8/ 56.9 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 3267 lost 3 crc 3 hb 12
+odom  50.1 Hz [ 13.8/ 20.0/ 57.0 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 3540 lost 3 crc 3 hb 13
+odom  50.1 Hz [ 13.8/ 19.9/ 55.7 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 3816 lost 3 crc 3 hb 14
+odom  50.3 Hz [ 13.8/ 19.9/ 55.6 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 4093 lost 3 crc 3 hb 15
+odom  50.1 Hz [ 13.9/ 20.0/ 56.9 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 4366 lost 3 crc 3 hb 16
+odom  44.3 Hz [ 13.8/ 22.6/136.6 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 4613 lost 4 crc 4 hb 17
+odom  50.4 Hz [ 13.8/ 19.9/ 55.5 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 4891 lost 4 crc 4 hb 18
+odom  50.2 Hz [ 13.8/ 19.9/ 56.9 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 5166 lost 4 crc 4 hb 19
+odom  49.9 Hz [ 13.8/ 20.0/ 56.9 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 5443 lost 4 crc 4 hb 20
+odom  49.5 Hz [ 13.8/ 20.2/ 56.9 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 5713 lost 4 crc 4 hb 21
+odom  48.4 Hz [ 13.8/ 20.7/ 76.4 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 5984 lost 5 crc 5 hb 22
+odom  50.6 Hz [ 13.8/ 19.8/ 77.8 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 6265 lost 5 crc 5 hb 23
+odom  50.1 Hz [ 13.9/ 19.9/ 55.6 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 6539 lost 5 crc 5 hb 24
+odom  49.9 Hz [ 13.8/ 20.1/ 77.8 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 6814 lost 5 crc 5 hb 25
+odom  50.1 Hz [ 13.9/ 19.9/ 77.8 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 7089 lost 5 crc 5 hb 26
+odom  43.2 Hz [ 13.8/ 23.1/115.3 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 7336 lost 6 crc 6 hb 27
+odom  49.8 Hz [ 13.8/ 20.1/ 56.9 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 7609 lost 6 crc 6 hb 28
+odom  50.3 Hz [ 13.9/ 19.9/ 54.1 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 7886 lost 6 crc 6 hb 29
+odom  50.1 Hz [ 13.8/ 20.0/ 57.0 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 8162 lost 6 crc 6 hb 30
+odom  50.1 Hz [ 13.8/ 20.0/ 56.9 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 8437 lost 6 crc 6 hb 31
+odom  48.9 Hz [ 13.8/ 20.4/ 56.9 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 8711 lost 7 crc 7 hb 32
+odom  50.1 Hz [ 13.9/ 19.9/ 52.8 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 8986 lost 7 crc 7 hb 33
+odom  49.8 Hz [ 13.9/ 20.1/ 57.0 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 9259 lost 7 crc 7 hb 34
+odom  50.0 Hz [ 13.9/ 20.0/ 54.1 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 9534 lost 7 crc 7 hb 35
+odom  50.5 Hz [ 13.9/ 19.8/ 52.8 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 9813 lost 7 crc 7 hb 36
+odom  44.2 Hz [ 13.8/ 22.6/137.7 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 10060 lost 8 crc 8 hb 37
+odom  49.8 Hz [ 13.9/ 20.1/ 56.9 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 10333 lost 8 crc 8 hb 38
+odom  50.4 Hz [ 12.4/ 19.8/ 77.8 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 10611 lost 8 crc 8 hb 39
+odom  49.8 Hz [ 13.8/ 20.1/ 76.4 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 10884 lost 8 crc 8 hb 40
+odom  50.4 Hz [ 13.8/ 19.9/ 77.9 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 11161 lost 8 crc 8 hb 41
+odom  49.4 Hz [ 13.8/ 20.3/ 76.4 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 11433 lost 9 crc 9 hb 42
+odom  50.2 Hz [ 13.8/ 19.9/ 56.9 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 11708 lost 9 crc 9 hb 43
+odom  50.1 Hz [ 13.8/ 19.9/ 76.4 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 11983 lost 9 crc 9 hb 44
+odom  50.4 Hz [ 13.8/ 19.9/ 76.4 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 12261 lost 9 crc 9 hb 45
+odom  49.8 Hz [ 13.8/ 20.1/ 76.4 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 12535 lost 9 crc 9 hb 46
+odom  42.7 Hz [ 13.8/ 23.4/130.5 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 12778 lost 15 crc 12 hb 47
+odom  51.1 Hz [ 13.8/ 19.6/ 57.0 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 13053 lost 15 crc 12 hb 48
+odom  49.6 Hz [ 13.8/ 20.2/ 77.8 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 13330 lost 15 crc 12 hb 49
+odom  49.8 Hz [ 13.8/ 20.1/ 56.9 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 13605 lost 15 crc 12 hb 50
+odom  50.4 Hz [ 13.8/ 19.9/ 56.9 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 13881 lost 15 crc 12 hb 51
+odom  49.6 Hz [ 13.9/ 20.2/ 62.5 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 14152 lost 16 crc 13 hb 52
+odom  50.1 Hz [ 13.9/ 20.0/ 56.9 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 14428 lost 16 crc 13 hb 53
+odom  50.4 Hz [ 13.8/ 19.8/ 56.9 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 14705 lost 16 crc 13 hb 54
+odom  50.1 Hz [ 13.8/ 19.9/ 56.9 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 14981 lost 16 crc 13 hb 55
+odom  50.2 Hz [ 13.8/ 19.9/ 56.9 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 15256 lost 16 crc 13 hb 56
+odom  45.8 Hz [ 13.8/ 21.8/111.1 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 15510 lost 17 crc 14 hb 57
+odom  49.4 Hz [ 13.9/ 20.2/ 77.8 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 15781 lost 17 crc 14 hb 57
+odom  50.2 Hz [ 13.8/ 19.9/ 57.0 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 16059 lost 17 crc 14 hb 58
+odom  49.9 Hz [ 13.9/ 20.1/ 56.9 ms]  x=  0.000 y=  0.000 yaw=    0.0 deg  vx= 0.000 wz= 0.000 | frames 16332 lost 17 crc 14 hb 59
+total: 60.0 s, 1382464 bytes, frames 16332, lost 17, crc 14
+odom gaps: n 2958  p50 13.9  p95 54.2  p99 57.0  max 137.7 ms

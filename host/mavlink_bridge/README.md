@@ -5,7 +5,7 @@ Linux 侧通过串口直接和固件对话的 MAVLink 桥接程序，不依赖 m
 ## 固件侧准备
 
 1. 在配网页把通信模式切到 **MAVLink UART**（`uart_mavlink`，见 [doc/protocols.md](../../doc/protocols.md#mavlink-uart)）。
-2. USB 线接开发板的 **UART0 口**（GPIO43/44，经 USB 转串口芯片，通常是 `/dev/ttyUSB0` 或 `/dev/ttyACM0`），不是 USB-Serial-JTAG 口。参数为 230400、8N1。
+2. USB 线接开发板的 **UART0 口**（GPIO43/44，经 USB 转串口芯片，通常是 `/dev/ttyUSB0` 或 `/dev/ttyACM0`），不是 USB-Serial-JTAG 口。参数为 921600、8N1（2026-10-31 之前的固件是 230400，用 `-b 230400`）。
 3. 当前用户需要串口权限：`sudo usermod -aG dialout $USER`，重新登录后生效。
 4. Ubuntu 22.04 自带的 `brltty` 会抢占 CH340 这类 USB 转串口芯片，表现为 `/dev/ttyUSB0` 插上后马上消失：`sudo apt remove brltty`。
 

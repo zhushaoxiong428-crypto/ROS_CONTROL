@@ -36,7 +36,9 @@ static constexpr uint32_t kMicroRosUartStartupDelayMs = 8000;
 static constexpr uart_port_t kMavlinkUartPort = UART_NUM_0;
 static constexpr gpio_num_t kMavlinkUartTxPin = GPIO_NUM_43;
 static constexpr gpio_num_t kMavlinkUartRxPin = GPIO_NUM_44;
-static constexpr int kMavlinkUartBaudRate = 230400;
+// 230400 was saturated: the 50 Hz messages alone need ~19 KB/s of its 23 KB/s,
+// and the log console shares UART0 (data/bridge_hw_20261031).
+static constexpr int kMavlinkUartBaudRate = 921600;
 static constexpr size_t kMavlinkUartRxBufferSize = 2048;
 static constexpr size_t kMavlinkUartTxBufferSize = 8192;
 static constexpr size_t kMavlinkReadBufferSize = 256;

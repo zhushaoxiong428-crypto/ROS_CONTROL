@@ -25,7 +25,7 @@
 
 | 模块 | 上游已有 | 本仓库的改动 | 关键 commit | 证据 |
 | --- | --- | --- | --- | --- |
-| Linux 上位机通信 | 固件侧 MAVLink UART（UART0，230400） | 新增 C++ 串口桥：`SerialPort`、`MavlinkLink`、epoll 事件循环、`--csv` 记录 | `ff1e194f` | 单元测试、PTY 联调；**实车联调进行中**（[测试计划](host/mavlink_bridge/README.md#验证状态)） |
+| Linux 上位机通信 | 固件侧 MAVLink UART（UART0，原 230400） | 新增 C++ 串口桥：`SerialPort`、`MavlinkLink`、epoll 事件循环、`--csv` 记录 | `ff1e194f` | 单元测试、PTY 联调；**实车联调进行中**（[测试计划](host/mavlink_bridge/README.md#验证状态)） |
 | 实时性 | FreeRTOS 任务框架、micro-ROS 发布循环 | 新增任务级 CPU / 栈 / 堆统计；修复 spin 等待导致的整周期漏发 | `f1f8f55a`、`a8de0e42` | [rt_analysis](data/rt_analysis_20261025)、[doc/realtime.md](doc/realtime.md)、[间隔分布图](doc/figures/odom_gaps.png) |
 | 控制循环 | `vTaskDelay` 周期 | `vTaskDelayUntil` + 实测 `dt`，周期统计 | `4cfe4a23`、`11432ce4` | [loop_timing](data/loop_timing_20261023) |
 | 编码器 | PCNT 驱动，软件猜测溢出（每次差 1 个计数） | 改由驱动累加，处理清零与中断累加之间的读数竞态 | `ed30148b` | [encoder_overflow](data/encoder_overflow_20261023)、[里程计标定](data/odom_calibration_20261024) |

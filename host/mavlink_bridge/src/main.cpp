@@ -41,7 +41,7 @@ constexpr int kSilentReportsBeforeWarning = 3;
 
 struct Options {
     std::string device = "/dev/ttyUSB0";
-    int baud = 230400;  // kMavlinkUartBaudRate
+    int baud = 921600;  // kMavlinkUartBaudRate
     bool drive = false;
     float vx = 0.0f;
     float wz = 0.0f;
@@ -69,7 +69,7 @@ void Usage(const char *argv0) {
     std::fprintf(stderr,
         "usage: %s [-d DEVICE] [-b BAUD] [--vx M_S] [--wz RAD_S] [-t SECONDS] [--csv FILE]\n"
         "  -d, --device    serial device (default /dev/ttyUSB0)\n"
-        "  -b, --baud      baud rate (default 230400)\n"
+        "  -b, --baud      baud rate (default 921600)\n"
         "      --vx        drive forward at this speed, m/s\n"
         "      --wz        turn at this rate, rad/s (counter-clockwise positive)\n"
         "  -t, --duration  stop driving and exit after this many seconds\n"

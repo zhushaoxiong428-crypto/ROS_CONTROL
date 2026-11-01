@@ -104,7 +104,9 @@
 
 ## MAVLink UART
 
-传输方式：`UART0`，波特率 `230400`，8N1。运行日志与 MAVLink UART 共用 UART0 串口。
+传输方式：`UART0`，波特率 `921600`，8N1。运行日志与 MAVLink UART 共用 UART0 串口。开机日志仍按控制台配置的 230400 输出，MAVLink 任务启动后 UART0 切到 921600，之后的日志也是 921600。
+
+原先用 230400 时链路被占满：50 Hz 的 ODOMETRY、ATTITUDE、ATTITUDE_QUATERNION、SCALED_IMU 每秒约 19 KB，再加上 10 Hz 消息和日志，实测吞吐 23041 B/s，等于 230400 的理论上限，固件发布周期 p99 达到 60 ms（[data/bridge_hw_20261031](../data/bridge_hw_20261031)）。
 
 | 项目 | 值 |
 | --- | --- |
