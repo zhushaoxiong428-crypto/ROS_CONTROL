@@ -16,6 +16,17 @@ jobs:
       - name: Test
         run: ctest --test-dir build-tests --output-on-failure
 
+  host-bridge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S host/mavlink_bridge -B build-bridge
+      - name: Build
+        run: cmake --build build-bridge
+      - name: Test
+        run: ctest --test-dir build-bridge --output-on-failure
+
   firmware:
     runs-on: ubuntu-latest
     container: espressif/idf:v5.5.3
