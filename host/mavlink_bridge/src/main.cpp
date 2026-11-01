@@ -1,7 +1,8 @@
 // leap_mavlink_bridge: talks to the leap_ros firmware over its MAVLink UART,
 // without micro-ROS. Prints odometry and link statistics once per second and
 // can drive the robot at a fixed velocity. With --csv every odometry arrival is
-// logged (host time and the firmware's own timestamp) for offline analysis.
+// logged (host time, the firmware's own timestamp, pose and velocity) for
+// offline analysis.
 //
 // One thread, one epoll set: the serial port, two timerfds (command stream,
 // report) and a signalfd for Ctrl-C. Nothing blocks except epoll_wait.
@@ -175,8 +176,9 @@ void HandleMessage(const mavlink_message_t &msg, int64_t start_ns, const leap_br
             t->last_odom_ns = now_ns;
             if (csv != nullptr) {
                 // time_usec is the firmware tick count, so it moves in tick steps.
-                std::fprintf(csv, "%.6f,%llu,%.4f,%.4f,%llu,%llu,%llu\n", (now_ns - start_ns) / 1e9,
-                             static_cast<unsigned long long>(odom.time_usec / 1000), odom.vx, odom.yawspeed,
+                std::fprintf(csv, "%.6f,%llu,%.4f,%.4f,%.4f,%.4f,%llu,%llu,%llu\n", (now_ns - start_ns) / 1e9,
+                             static_cast<unsigned long long>(odom.time_usec / 1000), odom.x, odom.y,
+                             odom.vx, odom.yawspeed,
                              static_cast<unsigned long long>(s.frames),
                              static_cast<unsigned long long>(s.lost_frames),
                              static_cast<unsigned long long>(s.crc_errors));
@@ -261,7 +263,9 @@ int main(int argc, char **argv) {
             std::perror(opt.csv_path.c_str());
             return 1;
         }
-        std::fprintf(csv.get(), "host_s,mcu_ms,vx_mps,wz_rads,frames,lost,crc\n");
+        // Line buffered, so a crashed or killed bridge loses at most one row.
+        std::setvbuf(csv.get(), nullptr, _IOLBF, 0);
+        std::fprintf(csv.get(), "host_s,mcu_ms,x_m,y_m,vx_mps,wz_rads,frames,lost,crc\n");
     }
 
     const int64_t start_ns = NowNs();
