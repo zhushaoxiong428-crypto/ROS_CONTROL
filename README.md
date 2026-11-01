@@ -19,6 +19,23 @@
 - **IMU 航向**：陀螺仪 Z 轴零偏在静止时持续跟踪，并校正了灵敏度，静止时航向不再漂移（见下文“IMU 航向”）。
 - **实时性**：新增每 10 秒打印一次的任务级 CPU、栈余量和堆统计；修复了 micro-ROS 发布循环漏发整个周期的问题，`/odom` 从 34 Hz 恢复到 50 Hz（见 [doc/realtime.md](doc/realtime.md)）。
 - **实车测试工具**：`tools/` 下的脚本通过 ROS 话题驱动小车并记录数据，`data/` 下保存了每一组实测数据。
+- **Linux 上位机**：新增 [host/mavlink_bridge](host/mavlink_bridge)，Linux 上用 C++ 直接通过串口和固件收发 MAVLink，不依赖 micro-ROS。
+
+### 改动对照
+
+| 模块 | 上游已有 | 本仓库的改动 | 关键 commit | 证据 |
+| --- | --- | --- | --- | --- |
+| Linux 上位机通信 | 固件侧 MAVLink UART（UART0，230400） | 新增 C++ 串口桥：`SerialPort`、`MavlinkLink`、epoll 事件循环、`--csv` 记录 | `ff1e194f` | 单元测试、PTY 联调；**实车联调进行中**（[测试计划](host/mavlink_bridge/README.md#验证状态)） |
+| 实时性 | FreeRTOS 任务框架、micro-ROS 发布循环 | 新增任务级 CPU / 栈 / 堆统计；修复 spin 等待导致的整周期漏发 | `f1f8f55a`、`a8de0e42` | [rt_analysis](data/rt_analysis_20261025)、[doc/realtime.md](doc/realtime.md)、[间隔分布图](doc/figures/odom_gaps.png) |
+| 控制循环 | `vTaskDelay` 周期 | `vTaskDelayUntil` + 实测 `dt`，周期统计 | `4cfe4a23`、`11432ce4` | [loop_timing](data/loop_timing_20261023) |
+| 编码器 | PCNT 驱动，软件猜测溢出（每次差 1 个计数） | 改由驱动累加，处理清零与中断累加之间的读数竞态 | `ed30148b` | [encoder_overflow](data/encoder_overflow_20261023)、[里程计标定](data/odom_calibration_20261024) |
+| IMU 航向 | 开机标定零偏 + 0.2 °/s 死区 | 静止时在线跟踪零偏，校正 Z 轴灵敏度 | `22ad9142`、`1fe74e49` | [imu_heading](data/imu_heading_20261024)、[航向对比图](doc/figures/imu_heading.png) |
+| 速度环 | 增量式 PID（板上 NVS 为 `kp=1.2, ki=0.5`） | 地面扫描 + 3×3 网格，默认改为 `kp=1.2, ki=4`；前馈等方案实测无改善，默认关闭 | `c159792b`–`60b69445`、`fc6ce69c` | [pid_grid](data/pid_grid_20261023_ground)、[doc/speed_control.md](doc/speed_control.md)、[阶跃对比图](doc/figures/speed_step.png) |
+| 运动安全 | 急停标志（从未被置位） | 500 ms 指令看门狗，急停改为锁存 | `13a9f470`、`f21f527d` | [超时测试（架空）](data/baseline_20261023_suspended)、`tests/command_watchdog_test.cpp` |
+| 工程化 | 锁文件依赖作者机器路径，无 CI | 可复现构建、CMake / CTest 主机测试、GitHub Actions | `512008fe`、`ae107196` | [.github/workflows/ci.yml](.github/workflows/ci.yml)、`tests/` |
+| Agent 连接 | 手动填写电脑 IP | 子网自动发现，连不上时告警 | `0ad9f5e5`、`de105250` | `tests/agent_discovery_test.cpp` |
+
+图由 `tools/plot_results.py` 从 `data/` 下的原始数据生成。
 
 ## 实测结果
 
