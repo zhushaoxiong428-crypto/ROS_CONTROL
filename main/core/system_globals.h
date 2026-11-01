@@ -14,6 +14,11 @@ enum class WifiCommMode : uint8_t {
     kMavlinkUart = 2,
     kMicroRosUart = 3,
 };
+// MAVLink UART and micro-ROS UART both send binary frames on UART0, which is
+// also the log console; periodic log reports there would land inside frames.
+inline bool Uart0CarriesBinaryLink(WifiCommMode mode) {
+    return mode == WifiCommMode::kMavlinkUart || mode == WifiCommMode::kMicroRosUart;
+}
 
 struct TargetHostInfo {
     bool valid;

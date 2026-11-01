@@ -23,7 +23,7 @@ static bool CommandsMotion(const MotionMsg& cmd) {
 
 static void log_timing(const CycleTimingStats::Summary& s) {
     // UART0 carries the XRCE-DDS stream in micro-ROS UART mode.
-    if (system_globals().runtime.wifi_comm_mode == WifiCommMode::kMicroRosUart) {
+    if (Uart0CarriesBinaryLink(system_globals().runtime.wifi_comm_mode)) {
         return;
     }
     ESP_LOGI(TAG, "control loop (%lu ms) n=%lu period mean=%.3f std=%.3f min=%.3f max=%.3f ms "

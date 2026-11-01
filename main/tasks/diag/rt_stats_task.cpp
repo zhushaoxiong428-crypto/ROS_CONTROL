@@ -87,7 +87,7 @@ void rt_stats_task(void *p) {
         }
         // UART0 carries the XRCE-DDS stream in micro-ROS UART mode.
         if (s_previous_count > 0 && count > 0 &&
-            system_globals().runtime.wifi_comm_mode != WifiCommMode::kMicroRosUart) {
+            !Uart0CarriesBinaryLink(system_globals().runtime.wifi_comm_mode)) {
             report(count, window);
         }
         for (UBaseType_t i = 0; i < count; ++i) {
